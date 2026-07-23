@@ -11,6 +11,8 @@ import './globals.css';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 const playfair = Playfair_Display({
