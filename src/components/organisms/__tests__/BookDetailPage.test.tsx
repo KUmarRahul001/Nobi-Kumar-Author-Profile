@@ -1,46 +1,61 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import BookDetailPage from '../../../app/(site)/books/[slug]/page';
 
-// Mock Next.js dynamic routing and headers
 vi.mock('next/navigation', () => ({
-  notFound: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND');
+  }),
 }));
 
-vi.mock('@/lib/db', () => ({
-  getBookBySlug: vi.fn().mockImplementation(async (slug: string) => {
-    if (slug === 'valid-slug') {
-      return {
-        slug: 'valid-slug',
-        title: 'Verma Legacy Novel',
-        format: 'kindle',
-        seriesName: 'Verma Saga',
-        volumeNumber: 1,
-        status: 'published',
-        synopsis: 'Details about the Verma family secrets.',
-        coverUrl: '',
-        buyLinks: [],
-        content: 'Content here.',
-      };
-    }
-    return null;
-  }),
-  getBooks: vi.fn().mockResolvedValue([]),
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    book: {
+      findUnique: vi.fn().mockImplementation(async ({ where }: { where: { slug: string } }) => {
+        if (where.slug !== 'valid-slug') {
+          return null;
+        }
+
+        return {
+          slug: 'valid-slug',
+          title: 'Verma Legacy Novel',
+          subtitle: null,
+          genre: 'Thriller',
+          seriesName: 'Verma Saga',
+          volumeNumber: 1,
+          shortDescription: 'Details about the Verma family secrets.',
+          fullSynopsis: 'Details about the Verma family secrets.',
+          releaseDate: '2026',
+          pages: 320,
+          coverUrl: '',
+          samplePdfUrl: null,
+          amazonLink: null,
+          pocketFmLink: null,
+          kukuFmLink: null,
+          audibleLink: null,
+        };
+      }),
+      findMany: vi.fn().mockResolvedValue([
+        {
+          slug: 'valid-slug',
+          title: 'Verma Legacy Novel',
+        },
+      ]),
+    },
+  },
 }));
 
 describe('BookDetailPage Routing Component', () => {
   it('renders breadcrumbs and featured details dynamically', async () => {
-    // Resolve Async Component params Promise wrapper
     const resolvedParams = Promise.resolve({ slug: 'valid-slug' });
-    const rendered = render(await BookDetailPage({ params: resolvedParams }));
+    render(await BookDetailPage({ params: resolvedParams }));
 
-    // Check breadcrumbs nodes
-    expect(screen.getByRole('link', { name: /books/i })).toHaveAttribute('href', '/books');
-
-    // Check novel title specifically as heading
+    expect(screen.getByRole('link', { name: /verma legacy novel/i })).toHaveAttribute(
+      'href',
+      '/books/valid-slug'
+    );
     expect(
-      screen.getByRole('heading', { level: 2, name: /verma legacy novel/i })
+      screen.getByRole('heading', { level: 1, name: /verma legacy novel/i })
     ).toBeInTheDocument();
   });
 });

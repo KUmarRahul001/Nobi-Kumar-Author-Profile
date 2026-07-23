@@ -19,6 +19,11 @@ export interface SubscribeResult {
   message: string;
 }
 
+interface MailchimpErrorBody {
+  title?: string;
+  detail?: string;
+}
+
 /**
  * Subscribe an email address to the Mailchimp audience list
  * Handles deduplication — won't throw if already subscribed
@@ -44,7 +49,8 @@ export async function subscribeToMailchimp(
       message: 'Successfully subscribed to the newsletter.',
     };
   } catch (err: unknown) {
-    const body = (err as { response?: { body?: Record<string, unknown> } })?.response?.body ?? err;
+    const body = ((err as { response?: { body?: MailchimpErrorBody } })?.response?.body ??
+      {}) as MailchimpErrorBody;
 
     // Mailchimp returns 400 with title 'Member Exists' for duplicates
     if (body?.title === 'Member Exists') {
