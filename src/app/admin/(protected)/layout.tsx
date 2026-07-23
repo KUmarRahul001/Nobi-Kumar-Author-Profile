@@ -12,6 +12,8 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Admin — Nobi Kumar',
   robots: { index: false, follow: false },
