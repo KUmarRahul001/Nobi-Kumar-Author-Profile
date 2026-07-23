@@ -60,14 +60,19 @@ function mapDbToBook(dbBook: any): Book {
   };
 }
 
+import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
+
 async function loadBooksFromPrisma(): Promise<Book[]> {
   try {
     const dbBooks = await prisma.book.findMany({
       orderBy: { displayOrder: 'asc' },
     });
-    return dbBooks.map(mapDbToBook);
+    if (dbBooks && dbBooks.length > 0) {
+      return dbBooks.map(mapDbToBook);
+    }
+    return FALLBACK_BOOKS;
   } catch {
-    return [];
+    return FALLBACK_BOOKS;
   }
 }
 
