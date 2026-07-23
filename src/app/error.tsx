@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React, { useEffect } from 'react';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -8,7 +8,7 @@ interface ErrorProps {
 }
 
 export default function GlobalError({ error, reset }: ErrorProps) {
-  React.useEffect(() => {
+  useEffect(() => {
     // Unhandled runtime error hook
   }, [error]);
 
