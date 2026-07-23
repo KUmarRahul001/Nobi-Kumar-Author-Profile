@@ -31,13 +31,20 @@ export const metadata: Metadata = {
     'Verma Legacy',
   ],
   verification: {
-    google: 'pmEqlYG7eLkXxQIzpdTzxSQHqzNgS0A70Oa9AnnWNXo',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const googleVerificationToken = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+
   return (
     <html lang="en" suppressHydrationWarning className={cn(playfair.variable, geist.variable)}>
+      <head>
+        {googleVerificationToken && (
+          <meta name="google-site-verification" content={googleVerificationToken} />
+        )}
+      </head>
       <body className="antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
       </body>
