@@ -52,7 +52,8 @@ export default function AdminSidebar({ userEmail }: { userEmail: string }) {
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {NAV.map((item) => {
           const isActive =
-            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+            pathname === item.href ||
+            (item.href !== '/admin' && (pathname?.startsWith(item.href) ?? false));
           return (
             <Link
               key={item.href}
