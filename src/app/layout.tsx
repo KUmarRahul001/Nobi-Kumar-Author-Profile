@@ -30,6 +30,9 @@ export const metadata: Metadata = {
     'Mystery Novels',
     'Verma Legacy',
   ],
+  verification: {
+    google: 'pmEqlYG7eLkXxQIzpdTzxSQHqzNgS0A70Oa9AnnWNXo',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
