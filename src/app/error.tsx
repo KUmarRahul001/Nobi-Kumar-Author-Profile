@@ -2,6 +2,8 @@
 
 import React, { useEffect } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
