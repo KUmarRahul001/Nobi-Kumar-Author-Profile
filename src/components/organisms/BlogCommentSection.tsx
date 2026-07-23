@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface Comment {
@@ -16,17 +16,15 @@ interface BlogCommentSectionProps {
 }
 
 export default function BlogCommentSection({ postSlug }: BlogCommentSectionProps) {
-  const [comments, setComments] = React.useState<Comment[]>([]);
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [body, setBody] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(
-    null
-  );
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [body, setBody] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Fetch approved comments on load (Task 18.2: Dynamic Comments Loader GET API)
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchComments = async () => {
       try {
         const response = await fetch(`/api/comments?postSlug=${encodeURIComponent(postSlug)}`);
