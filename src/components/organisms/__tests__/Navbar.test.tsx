@@ -29,7 +29,7 @@ describe('Navbar Component', () => {
       title: 'The Verma Legacy',
       synopsis: 'Test synopsis',
     },
-  ];
+  ] as unknown as import('@/lib/db').Book[];
 
   const mockPosts = [
     {
@@ -37,7 +37,7 @@ describe('Navbar Component', () => {
       title: 'Chronicles Entry',
       excerpt: 'Post excerpt',
     },
-  ];
+  ] as unknown as import('@/lib/db').Post[];
 
   it('renders navbar logo identity and navigation links', () => {
     render(<Navbar books={mockBooks} posts={mockPosts} />);
