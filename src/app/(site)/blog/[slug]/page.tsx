@@ -2,19 +2,14 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getPostBySlug, getPosts } from '@/lib/db';
+import { getPostBySlug } from '@/lib/db';
 import BlogCommentSection from '@/components/organisms/BlogCommentSection';
 import Breadcrumbs from '@/components/molecules/Breadcrumbs';
 
+export const dynamic = 'force-dynamic';
+
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const posts = await getPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
