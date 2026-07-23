@@ -2,10 +2,13 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://authornobikumar.netlify.app';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://authornobikumar.netlify.app';
 
   // Static core routes
   const staticRoutes: MetadataRoute.Sitemap = [
