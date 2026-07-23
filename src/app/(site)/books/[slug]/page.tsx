@@ -9,20 +9,35 @@ interface BookPageProps {
   params: Promise<{ slug: string }>;
 }
 
+import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
+
+function mapFallbackToPrismaFormat(b: any) {
+  return {
+    ...b,
+    amazonLink: b.buyLinks?.amazon || '',
+    googlePlayLink: b.buyLinks?.googlePlay || '',
+    appleBooksLink: b.buyLinks?.appleBooks || '',
+    pocketFmLink: b.buyLinks?.pocketFm || '',
+    kukuFmLink: b.buyLinks?.kukuFm || '',
+    audibleLink: b.buyLinks?.audible || '',
+  };
+}
+
 async function getBookBySlugFromPrisma(slug: string) {
   try {
-    return await prisma.book.findUnique({ where: { slug } });
-  } catch {
-    return null;
-  }
+    const book = await prisma.book.findUnique({ where: { slug } });
+    if (book) return book;
+  } catch {}
+  const fb = FALLBACK_BOOKS.find((b) => b.slug === slug);
+  return fb ? mapFallbackToPrismaFormat(fb) : null;
 }
 
 async function getAllBooksFromPrisma() {
   try {
-    return await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
-  } catch {
-    return [];
-  }
+    const books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
+    if (books && books.length > 0) return books;
+  } catch {}
+  return FALLBACK_BOOKS.map(mapFallbackToPrismaFormat);
 }
 
 export async function generateMetadata({ params }: BookPageProps): Promise<Metadata> {
