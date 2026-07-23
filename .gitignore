@@ -1,41 +1,242 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ═══════════════════════════════════════════════════════════════════
+#  Nobi Kumar Author Platform — FINAL .gitignore
+#  Stack: Next.js 16 · Prisma · Supabase · Cloudinary · Upstash
+#         Vercel · Redis · Mailchimp · Cloudflare
+# ═══════════════════════════════════════════════════════════════════
 
-# dependencies
-/node_modules
-/.pnp
+# ── Node / Package managers ─────────────────────────────────────────
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
+package-lock.json.bak
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
+# ── Next.js build output ─────────────────────────────────────────────
+.next/
+out/
+build/
+.turbo/
 next-env.d.ts
+
+# ── TypeScript ────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ══════════════════════════════════════════════════════════════════════
+# SECRETS — NEVER commit ANY of these
+# ══════════════════════════════════════════════════════════════════════
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+.env.staging.local
+*.env
+# Allow example/template files through
+!.env.example
+!.env.local.example
+!.env.*.example
+
+# ── Certificates & private keys ────────────────────────────────────────
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.cer
+*.der
+*.jks
+*.keystore
+
+# ══════════════════════════════════════════════════════════════════════
+# DATABASES — Local dev only, never commit
+# ══════════════════════════════════════════════════════════════════════
+dev.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
+
+# ── Prisma generated client (regenerated via prisma generate) ──────────
+src/generated/
+node_modules/.prisma/
+# NOTE: prisma/schema.prisma + prisma/migrations/ ARE tracked ✅
+
+# ── Supabase local CLI state (not the migrations!) ─────────────────────
+.supabase/
+supabase/.branches/
+supabase/.temp/
+# NOTE: supabase/migrations/*.sql ARE tracked ✅
+
+# ══════════════════════════════════════════════════════════════════════
+# UPSTASH / REDIS — local cache dumps, connection dumps
+# ══════════════════════════════════════════════════════════════════════
+*.rdb
+dump.rdb
+.upstash/
+
+# ══════════════════════════════════════════════════════════════════════
+# CLOUDFLARE
+# ══════════════════════════════════════════════════════════════════════
+.wrangler/
+wrangler.toml.bak
+
+# ══════════════════════════════════════════════════════════════════════
+# AI / AGENT TOOL DIRECTORIES — machine-generated, not source code
+# ══════════════════════════════════════════════════════════════════════
+.agents/
+.claude/
+.windsurf/
+.cursor/
+.copilot/
+.codeium/
+brain/
+skills-lock.json
+TASKLIST.md
+# NOTE: AGENTS.md and CLAUDE.md ARE tracked ✅ (human-authored instructions)
+
+# ══════════════════════════════════════════════════════════════════════
+# UNPUBLISHED MANUSCRIPT / DRAFT CONTENT
+# Full novels are your IP — shouldn't sit in the repo even if private
+# now (repo could go public later, or a collaborator gets added)
+# ══════════════════════════════════════════════════════════════════════
+content/manuscripts/full/
+content/drafts/
+*.docx
+*.epub
+!public/samples/*.epub
+
+# ══════════════════════════════════════════════════════════════════════
+# PAYMENT / WEBHOOK LOCAL DEBUG LOGS
+# Razorpay test-mode logs can contain order/customer test data
+# ══════════════════════════════════════════════════════════════════════
+razorpay-debug.log
+webhook-logs/
+*.webhook.log
+
+# ══════════════════════════════════════════════════════════════════════
+# BUNDLE / BUILD ANALYSIS
+# ══════════════════════════════════════════════════════════════════════
+.next/analyze/
+bundle-stats.json
+
+# ══════════════════════════════════════════════════════════════════════
+# LOCAL SEED / EXPORT DATA (not the seed *script*, the generated dumps)
+# ══════════════════════════════════════════════════════════════════════
+prisma/seed-data/*.json
+*.export.csv
+
+# ══════════════════════════════════════════════════════════════════════
+# OS / SYSTEM ARTIFACTS
+# ══════════════════════════════════════════════════════════════════════
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Thumbs.db:encryptable
+desktop.ini
+$RECYCLE.BIN/
+
+# ── IDE / Editor artifacts ─────────────────────────────────────────────
+.idea/
+.idea/**
+*.iml
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.code-workspace
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+\#*\#
+
+# ══════════════════════════════════════════════════════════════════════
+# TESTING & COVERAGE
+# ══════════════════════════════════════════════════════════════════════
+coverage/
+.nyc_output/
+*.lcov
+junit.xml
+test-results/
+playwright-report/
+playwright/.cache/
+.vitest/
+__snapshots__/
+
+# ══════════════════════════════════════════════════════════════════════
+# LOGS
+# ══════════════════════════════════════════════════════════════════════
+logs/
+*.log
+*.log.*
+
+# ══════════════════════════════════════════════════════════════════════
+# DEPLOYMENT & CI CACHES
+# ══════════════════════════════════════════════════════════════════════
+.vercel/
+.netlify/
+
+# ══════════════════════════════════════════════════════════════════════
+# BUILD / CACHE ARTIFACTS
+# ══════════════════════════════════════════════════════════════════════
+dist/
+.cache/
+tmp/
+temp/
+.eslintcache
+.stylelintcache
+.parcelcache/
+.rollup.cache/
+
+# ── User-generated uploads (local dev only) ────────────────────────────
+public/uploads/
+public/temp/
+
+# ── Sentry ────────────────────────────────────────────────────────────
+.sentryclirc
+
+# ── Storybook ────────────────────────────────────────────────────────
+storybook-static/
+
+# ══════════════════════════════════════════════════════════════════════
+# FILES INTENTIONALLY TRACKED (do NOT add these above)
+# ══════════════════════════════════════════════════════════════════════
+# ✅ package.json               — project manifest
+# ✅ package-lock.json          — reproducible installs
+# ✅ tsconfig.json              — TypeScript config
+# ✅ vercel.json                — deployment config
+# ✅ components.json            — shadcn/ui config
+# ✅ next.config.ts             — Next.js config
+# ✅ prisma/schema.prisma       — database schema
+# ✅ prisma/seed.ts             — seed script
+# ✅ prisma/migrations/         — database migrations
+# ✅ supabase/migrations/*.sql  — Supabase SQL migrations
+# ✅ src/content/universe/map.json — universe map data
+# ✅ .github/                   — CI/CD workflows
+# ✅ .husky/                    — Git hooks
+# ✅ .env.local.example         — safe env template
+docs/
+# ✅ AGENTS.md, CLAUDE.md       — AI instruction files
+# ✅ README.md                  — project readme

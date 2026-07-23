@@ -1,0 +1,248 @@
+{
+  "timeline": [
+    {
+      "id": "event-1",
+      "year": "Phase 1 - Origin",
+      "title": "The Stairwell Incident & Anaya's Fall",
+      "novel": "The Shadow That Followed (Verma Saga Book 01)",
+      "novelSlug": "the-shadow-that-followed",
+      "category": "Verma Saga Origin",
+      "description": "Chronological Position #1 (Confirmed Order). Rhea uncovers the pen drive containing the unedited CCTV footage of the night Anaya fell down the stairwell, shattering Aarav Verma's initial confession."
+    },
+    {
+      "id": "event-2",
+      "year": "Phase 2 - Confession",
+      "title": "Aarav's Drowning Guilt & Confession",
+      "novel": "The Shadow Who Watched (Verma Saga Book 02)",
+      "novelSlug": "the-shadow-who-watched",
+      "category": "Verma Saga Continuation",
+      "description": "Chronological Position #2. Written from inside Aarav's cracked mind as he replays the night of the stairwell tragedy and blames himself under constant surveillance."
+    },
+    {
+      "id": "event-3",
+      "year": "Phase 3 - Investigation",
+      "title": "The Enigmatic Alleyway Murder in Mumbai",
+      "novel": "Whispers of Shadows (Arjun Mehra Chronicles)",
+      "novelSlug": "whispers-of-shadows",
+      "category": "Crime & Investigation",
+      "description": "Detective Arjun Mehra stands at the edge of a chilling moonlight murder scene in Mumbai, unearthing dark archives and cross-universe criminal seeds."
+    },
+    {
+      "id": "event-4",
+      "year": "Phase 4 - Synthetic Memory",
+      "title": "Memory Implants & The Edge of Memory",
+      "novel": "False Memories Vol. 1",
+      "novelSlug": "false-memories-vol-1",
+      "category": "Multiverse & Sci-Fi",
+      "description": "Explores quantum memory distortions: 'She said, You will forget me. He never wanted to.' Characters realize their memories were synthetic implants."
+    },
+    {
+      "id": "event-5",
+      "year": "Phase 5 - Obsession",
+      "title": "Lethal Devotion & Dark Campus Secrets",
+      "novel": "JUNOON: Love Ya Death",
+      "novelSlug": "junoon-love-ya-death",
+      "category": "Romantic Suspense",
+      "description": "High-octane obsession where passionate devotion crosses into mortal danger, connecting campus secret societies to the NNU."
+    },
+    {
+      "id": "event-6",
+      "year": "Phase 6 - Emotional Reclamation",
+      "title": "Self-Discovery & Friendship Healing",
+      "novel": "Dosti Aur Dil",
+      "novelSlug": "dosti-aur-dil",
+      "category": "Human Experience",
+      "description": "A journey of love, deep bonds, and emotional recovery for characters surviving the psychological trauma of the universe."
+    },
+    {
+      "id": "event-7",
+      "year": "Phase 7 - NNU Convergence",
+      "title": "Forgotten Diaries & The Flavours of Fate",
+      "novel": "FATEFUL FLAVOURS",
+      "novelSlug": "fateful-flavours",
+      "category": "Master Convergence",
+      "description": "Haunting memories and forgotten diaries bind all 7 standalone stories, multiverse threads, and character registries into the grand NNU Crossover Mode."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "node-1",
+      "slug": "the-shadow-that-followed",
+      "label": "The Shadow That Followed",
+      "type": "story",
+      "summary": "Verma Saga Book 01 (Chronological #1). Rhea's discovery of the unedited pen drive.",
+      "bookId": "the-shadow-that-followed",
+      "positionX": 250,
+      "positionY": 200,
+      "bio": "To the ones who saw everything and stayed quiet anyway—may you find the courage to break the script before it breaks you. The night remembers who stood on the stairs."
+    },
+    {
+      "id": "node-2",
+      "slug": "the-shadow-who-watched",
+      "label": "The Shadow Who Watched",
+      "type": "story",
+      "summary": "Verma Saga Book 02 (Chronological #2). Aarav's cracked confession.",
+      "bookId": "the-shadow-who-watched",
+      "positionX": 500,
+      "positionY": 200,
+      "bio": "For the ones who still replay that one night in their head and blame themselves. Silence was never protection—it was only delay."
+    },
+    {
+      "id": "node-3",
+      "slug": "false-memories-vol-1",
+      "label": "False Memories Vol. 1",
+      "type": "story",
+      "summary": "The Edge of Memory – what if your memories were never yours to begin with.",
+      "bookId": "false-memories-vol-1",
+      "positionX": 750,
+      "positionY": 200,
+      "bio": "She said, 'You'll forget me.' He never wanted to. A psychological suspense novel into quantum memory implants and multiverse theory."
+    },
+    {
+      "id": "node-4",
+      "slug": "whispers-of-shadows",
+      "label": "Whispers of Shadows",
+      "type": "story",
+      "summary": "Detective Arjun Mehra Chronicles: Unveiling the Enigma.",
+      "bookId": "whispers-of-shadows",
+      "positionX": 250,
+      "positionY": 450,
+      "bio": "In the heart of Mumbai, Detective Arjun Mehra investigates an enigmatic murder scene under moonlit alleyways."
+    },
+    {
+      "id": "node-5",
+      "slug": "junoon-love-ya-death",
+      "label": "JUNOON: Love Ya Death",
+      "type": "story",
+      "summary": "High-octane romantic suspense and lethal obsession.",
+      "bookId": "junoon-love-ya-death",
+      "positionX": 500,
+      "positionY": 450,
+      "bio": "A story where passionate devotion crosses into mortal danger and dark campus secrets."
+    },
+    {
+      "id": "node-6",
+      "slug": "dosti-aur-dil",
+      "label": "Dosti Aur Dil",
+      "type": "story",
+      "summary": "A Journey of Love, Friendship, and Self-Discovery.",
+      "bookId": "dosti-aur-dil",
+      "positionX": 750,
+      "positionY": 450,
+      "bio": "An emotional narrative of healing, deep family bonds, and self-discovery following psychological trauma."
+    },
+    {
+      "id": "node-7",
+      "slug": "fateful-flavours",
+      "label": "FATEFUL FLAVOURS",
+      "type": "story",
+      "summary": "Haunting memories, forgotten diaries, and the flavours of fate.",
+      "bookId": "fateful-flavours",
+      "positionX": 500,
+      "positionY": 325,
+      "bio": "The grand NNU convergence novel where forgotten diaries bind all 7 standalone stories into Crossover Mode."
+    },
+    {
+      "id": "node-8",
+      "slug": "rhea-kapoor",
+      "label": "Rhea Kapoor",
+      "type": "character",
+      "summary": "Protagonist of The Shadow That Followed.",
+      "positionX": 250,
+      "positionY": 80,
+      "bio": "Discovers the pen drive containing unedited footage of the night Anaya fell, exposing the Verma family edits."
+    },
+    {
+      "id": "node-9",
+      "slug": "aarav-verma",
+      "label": "Aarav Verma",
+      "type": "character",
+      "summary": "Central narrator of The Shadow Who Watched.",
+      "positionX": 500,
+      "positionY": 80,
+      "bio": "A boy drowning in guilt and memory distortions who believed he caused the stairwell tragedy."
+    },
+    {
+      "id": "node-10",
+      "slug": "st-jude-stairwell",
+      "label": "St. Jude Stairwell",
+      "type": "location",
+      "summary": "The origin point of the Verma Saga.",
+      "positionX": 750,
+      "positionY": 80,
+      "bio": "The moonlit stairwell where Anaya fell and CCTV footage was edited."
+    },
+    {
+      "id": "node-11",
+      "slug": "arjun-mehra",
+      "label": "Detective Arjun Mehra",
+      "type": "character",
+      "summary": "Lead detective in Whispers of Shadows.",
+      "positionX": 250,
+      "positionY": 570,
+      "bio": "Relentless investigator probing Mumbai dark alleyway crime archives."
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "sourceNodeId": "node-1",
+      "targetNodeId": "node-2",
+      "relationType": "chronological order #1 -> #2"
+    },
+    {
+      "id": "e2",
+      "sourceNodeId": "node-2",
+      "targetNodeId": "node-3",
+      "relationType": "memory distortion"
+    },
+    {
+      "id": "e3",
+      "sourceNodeId": "node-3",
+      "targetNodeId": "node-7",
+      "relationType": "merged into NNU"
+    },
+    {
+      "id": "e4",
+      "sourceNodeId": "node-4",
+      "targetNodeId": "node-7",
+      "relationType": "merged into NNU"
+    },
+    {
+      "id": "e5",
+      "sourceNodeId": "node-5",
+      "targetNodeId": "node-7",
+      "relationType": "merged into NNU"
+    },
+    {
+      "id": "e6",
+      "sourceNodeId": "node-6",
+      "targetNodeId": "node-7",
+      "relationType": "merged into NNU"
+    },
+    {
+      "id": "e7",
+      "sourceNodeId": "node-8",
+      "targetNodeId": "node-1",
+      "relationType": "uncovers pen drive in"
+    },
+    {
+      "id": "e8",
+      "sourceNodeId": "node-9",
+      "targetNodeId": "node-2",
+      "relationType": "narrator of"
+    },
+    {
+      "id": "e9",
+      "sourceNodeId": "node-10",
+      "targetNodeId": "node-1",
+      "relationType": "stairwell incident in"
+    },
+    {
+      "id": "e10",
+      "sourceNodeId": "node-11",
+      "targetNodeId": "node-4",
+      "relationType": "investigates"
+    }
+  ]
+}
