@@ -1,10 +1,11 @@
 'use client';
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -14,12 +15,12 @@ export default function AdminLoginPage() {
   const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [magicSent, setMagicSent] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handlePasswordLogin(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
+    const supabase = createClient();
 
     try {
       // 1. Try DB user credentials via /api/admin/login
@@ -60,6 +61,7 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
+    const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${window.location.origin}/admin` },
