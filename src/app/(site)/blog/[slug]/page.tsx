@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getPostBySlug, getPosts } from '@/lib/db';
@@ -100,7 +101,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
 
           {/* Comments Section Component (FR-07) */}
-          <BlogCommentSection postSlug={post.slug} />
+          <Suspense
+            fallback={<div className="text-xs font-mono text-muted py-8">Loading comments…</div>}
+          >
+            <BlogCommentSection postSlug={post.slug} />
+          </Suspense>
         </article>
       </div>
     </>

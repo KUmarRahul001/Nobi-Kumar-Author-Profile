@@ -11,10 +11,12 @@ const globalForRedis = global as unknown as { redis: Redis };
 
 export const redis =
   globalForRedis.redis ??
-  new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+  (process.env.UPSTASH_REDIS_REST_URL?.startsWith('http')
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      })
+    : Redis.fromEnv());
 
 if (process.env.NODE_ENV !== 'production') {
   globalForRedis.redis = redis;
