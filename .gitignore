@@ -237,6 +237,9 @@ storybook-static/
 # ✅ .github/                   — CI/CD workflows
 # ✅ .husky/                    — Git hooks
 # ✅ .env.local.example         — safe env template
+# ═══════════════════════════════════════════════════════════════════
+# DOCUMENTATION EXCLUSIONS
+# ═══════════════════════════════════════════════════════════════════
 docs/
-# ✅ AGENTS.md, CLAUDE.md       — AI instruction files
+docs/**
 # ✅ README.md                  — project readme
