@@ -8,6 +8,8 @@ import Navbar from '@/components/organisms/Navbar';
 import Footer from '@/components/organisms/Footer';
 import { getBooks, getPosts } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   // Fetch data server-side to populate Navbar search index
   const books = await getBooks();
