@@ -20,6 +20,8 @@ const playfair = Playfair_Display({
   variable: '--font-serif',
 });
 
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
+
 export const metadata: Metadata = {
   title: 'Nobi Kumar | Official Author Website',
   description: 'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar.',
@@ -37,6 +39,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const googleVerificationToken = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
     <html lang="en" suppressHydrationWarning className={cn(playfair.variable, geist.variable)}>
@@ -47,6 +51,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased min-h-screen bg-background text-foreground transition-colors duration-300">
         <Providers>{children}</Providers>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
+        {gtmId && <GoogleTagManager gtmId={gtmId} />}
       </body>
     </html>
   );
