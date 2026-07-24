@@ -6,6 +6,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import {
   cacheGet,
   cacheSet,
@@ -65,14 +66,29 @@ const BookInputSchema = z.object({
   displayOrder: z.number().int().optional(),
 });
 
-// ─── Auth helper ────────────────────────────────────────────────────────────
-function isAdminAuthorized(req: NextRequest): boolean {
+async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
+  // 1. Check admin_session cookie
+  const adminCookie = req.cookies.get('admin_session')?.value;
+  if (adminCookie) return true;
+
+  // 2. Check Supabase Auth session via cookies
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && user.email) {
+      const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase());
+      if (adminEmails.includes(user.email.toLowerCase())) return true;
+    }
+  } catch {}
+
+  // 3. Fallback header check
   const passcode = req.headers.get('x-admin-passcode');
   const envPasscode = process.env.ADMIN_PASSCODE || process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
   if (envPasscode && passcode === envPasscode) return true;
-
-  const adminCookie = req.cookies.get('admin_session')?.value;
-  if (adminCookie) return true;
 
   return false;
 }
@@ -250,7 +266,7 @@ export async function GET(req: NextRequest) {
 
 // ─── POST — Create new book ───────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  if (!isAdminAuthorized(req)) {
+  if (!(await isAdminAuthorized(req))) {
     return NextResponse.json(
       { error: 'Unauthorized: Admin authentication required.' },
       { status: 401 }
@@ -298,7 +314,7 @@ export async function POST(req: NextRequest) {
 
 // ─── PUT — Update existing book ───────────────────────────────────────────────
 export async function PUT(req: NextRequest) {
-  if (!isAdminAuthorized(req)) {
+  if (!(await isAdminAuthorized(req))) {
     return NextResponse.json(
       { error: 'Unauthorized: Admin authentication required.' },
       { status: 401 }
@@ -346,7 +362,7 @@ export async function PUT(req: NextRequest) {
 
 // ─── DELETE — Remove a book ───────────────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
-  if (!isAdminAuthorized(req)) {
+  if (!(await isAdminAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
