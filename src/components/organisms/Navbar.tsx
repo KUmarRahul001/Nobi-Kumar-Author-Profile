@@ -24,11 +24,6 @@ export default function Navbar({ books, posts }: NavbarProps) {
     setMounted(true);
   }, []);
 
-  // Hide Navbar on the Home / Landing Page ("/") exactly like chetanbhagat.com landing portal
-  if (pathname === '/') {
-    return <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />;
-  }
-
   const toggleTheme = () => {
     if (!mounted) return;
     setTheme(theme === 'dark' ? 'light' : 'dark');

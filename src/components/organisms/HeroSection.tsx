@@ -8,17 +8,6 @@ export default function HeroSection() {
       aria-label="Author Entrance Portal"
       className="w-full min-h-screen relative bg-neutral-950 text-white overflow-hidden flex flex-col justify-between"
     >
-      {/* Top Notice Bar */}
-      <div className="w-full bg-black text-neutral-400 text-[11px] md:text-xs font-mono py-2.5 px-4 text-center border-b border-neutral-800/80 z-20">
-        <span>For official media queries or publishing requests Contact ✉ </span>
-        <a
-          href="mailto:nobikumar.author@gmail.com"
-          className="text-white hover:text-red-400 font-bold underline"
-        >
-          nobikumar.author@gmail.com
-        </a>
-      </div>
-
       {/* Split Screen Portal (Full Height) */}
       <div className="relative w-full flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-800">
         {/* Left Half: THE NOVELIST / AUTHOR (Dark background with Author Portrait) */}
@@ -100,17 +89,6 @@ export default function HeroSection() {
             src="/assets/nobi-signature.png"
             alt="Nobi Kumar Signature Logo"
             className="h-16 w-auto object-contain"
-          />
-        </div>
-      </div>
-
-      {/* Hero Beehiiv Newsletter Banner */}
-      <div className="w-full bg-neutral-950 border-t border-neutral-800 p-6 md:p-8 z-20">
-        <div className="max-w-4xl mx-auto">
-          <NewsletterSignup
-            variant="hero"
-            title="The Nobi Kumar Newsletter"
-            subtitle="Get secret author updates, early release announcements, and exclusive case files delivered straight to your inbox."
           />
         </div>
       </div>

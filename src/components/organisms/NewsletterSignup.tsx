@@ -98,7 +98,10 @@ export default function NewsletterSignup({
           </div>
         )}
 
-        <form onSubmit={handleSubscribe} className="flex gap-2">
+        <form
+          onSubmit={handleSubscribe}
+          className="flex flex-col xs:flex-row sm:flex-row gap-2 w-full"
+        >
           <label htmlFor="newsletter-email-inline" className="sr-only">
             Email Address
           </label>
@@ -109,12 +112,12 @@ export default function NewsletterSignup({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address"
-            className="flex-1 bg-card/60 border border-border/80 rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:border-crimson placeholder:text-muted/60 focus:ring-1 focus:ring-crimson transition-all"
+            className="flex-1 w-full min-w-0 bg-card/60 border border-border/80 rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:border-crimson placeholder:text-muted/60 focus:ring-1 focus:ring-crimson transition-all"
           />
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-4 py-2.5 rounded-xl text-xs font-mono uppercase font-bold bg-crimson hover:bg-crimson/90 text-white disabled:opacity-50 transition-all focus:outline-none focus:ring-2 focus:ring-crimson shadow-md"
+            className="w-full xs:w-auto sm:w-auto px-4 py-2.5 rounded-xl text-xs font-mono uppercase font-bold bg-crimson hover:bg-crimson/90 text-white disabled:opacity-50 transition-all focus:outline-none focus:ring-2 focus:ring-crimson shadow-md whitespace-nowrap"
           >
             {isSubmitting ? '...' : 'Subscribe'}
           </button>
