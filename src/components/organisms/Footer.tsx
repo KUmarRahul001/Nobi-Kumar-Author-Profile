@@ -97,6 +97,9 @@ export default function Footer() {
           <div className="text-[10px] font-mono text-muted space-y-1">
             <p>© {currentYear} Nobi Kumar. All rights reserved.</p>
             <p>Designed for psychological thriller and mystery readers.</p>
+            <p className="text-[9px] opacity-70 pt-1">
+              As an Amazon Associate, Nobi Kumar earns from qualifying purchases.
+            </p>
           </div>
         </div>
       </div>

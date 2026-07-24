@@ -10,6 +10,7 @@ interface BookPageProps {
 }
 
 import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
+import { getAmazonAffiliateLink, AMAZON_AFFILIATE_DISCLAIMER } from '@/lib/affiliate';
 
 function mapFallbackToPrismaFormat(b: any) {
   return {
@@ -186,7 +187,7 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                   <div className="flex flex-wrap gap-3">
                     {currentBook.amazonLink && (
                       <a
-                        href={currentBook.amazonLink}
+                        href={getAmazonAffiliateLink(currentBook.amazonLink)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow"
@@ -225,6 +226,10 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                       </a>
                     )}
                   </div>
+                  {/* Amazon Associates Earnings Disclaimer */}
+                  <p className="text-[10px] text-muted/70 italic pt-2 leading-tight">
+                    {AMAZON_AFFILIATE_DISCLAIMER}
+                  </p>
                 </div>
               </div>
             </div>
