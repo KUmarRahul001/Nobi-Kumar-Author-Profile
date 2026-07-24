@@ -6,6 +6,8 @@ import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 
+import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
+
 async function getStats() {
   try {
     const [books, posts, subscribers, messages] = await Promise.all([
@@ -14,9 +16,11 @@ async function getStats() {
       prisma.subscriber.count(),
       prisma.contactMessage.count({ where: { read: false } }),
     ]);
-    return { books, posts, subscribers, unreadMessages: messages };
+
+    const booksCount = books > 0 ? books : FALLBACK_BOOKS.length;
+    return { books: booksCount, posts, subscribers, unreadMessages: messages };
   } catch {
-    return { books: 0, posts: 0, subscribers: 0, unreadMessages: 0 };
+    return { books: FALLBACK_BOOKS.length, posts: 0, subscribers: 0, unreadMessages: 0 };
   }
 }
 
