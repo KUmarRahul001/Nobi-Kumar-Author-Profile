@@ -32,7 +32,6 @@ export default function AdminBooksClient({ books: initialBooks }: { books: Book[
     try {
       const res = await fetch(`/api/manage-books?slug=${slug}`, {
         method: 'DELETE',
-        headers: { 'x-admin-passcode': process.env.NEXT_PUBLIC_ADMIN_PASSCODE || '' },
       });
       if (res.ok) {
         setBooks((prev) => prev.filter((b) => b.slug !== slug));
