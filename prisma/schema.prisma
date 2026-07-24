@@ -1,46 +1,44 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model Book {
-  slug             String   @id
-  title            String
-  subtitle         String?
-  seriesName       String?
-  volumeNumber     Int?
-  genre            String
-  tags             String   // comma-separated
-  shortDescription String
-  fullSynopsis     String
-  releaseDate      String
-  isbn             String?
-  language         String   @default("English")
-  pages            Int?
-  readingTime      String?
-  status           String   @default("published")
-  coverUrl         String?
-  bannerUrl        String?
-  trailerLink      String?
-  samplePdfUrl     String?
-  previewUrl       String?
-  awards           String?  // comma-separated
-  isFeatured       Boolean  @default(false)
-  isBestseller     Boolean  @default(false)
-  isEditorsChoice  Boolean  @default(false)
-  displayOrder     Int      @default(0)
-  seoTitle         String?
-  seoDescription   String?
-  socialShareImage String?
-  authorNotes      String?
-  ageRating        String?
-  contentWarning   String?
-  lastUpdated      DateTime @default(now()) @updatedAt
+datasource db {
+  provider = "postgresql"
+}
 
-  // Purchase & Audio Streaming links
+model Book {
+  slug                String    @id
+  title               String
+  subtitle            String?
+  seriesName          String?
+  volumeNumber        Int?
+  genre               String
+  tags                String
+  shortDescription    String
+  fullSynopsis        String
+  releaseDate         String
+  isbn                String?
+  language            String    @default("English")
+  pages               Int?
+  readingTime         String?
+  status              String    @default("published")
+  coverUrl            String?
+  bannerUrl           String?
+  trailerLink         String?
+  samplePdfUrl        String?
+  previewUrl          String?
+  awards              String?
+  isFeatured          Boolean   @default(false)
+  isBestseller        Boolean   @default(false)
+  isEditorsChoice     Boolean   @default(false)
+  displayOrder        Int       @default(0)
+  seoTitle            String?
+  seoDescription      String?
+  socialShareImage    String?
+  authorNotes         String?
+  ageRating           String?
+  contentWarning      String?
+  lastUpdated         DateTime  @default(now()) @updatedAt
   amazonLink          String?
   googlePlayLink      String?
   appleBooksLink      String?
@@ -49,16 +47,12 @@ model Book {
   hardcoverLink       String?
   officialWebsiteLink String?
   customLink          String?
-
-  // Audiobook & Audio Drama Platforms
-  pocketFmLink        String?
-  kukuFmLink          String?
+  createdAt           DateTime  @default(now())
   audibleLink         String?
+  kukuFmLink          String?
+  pocketFmLink        String?
   storytelLink        String?
-
   comments            Comment[]
-
-  createdAt DateTime @default(now())
 
   @@index([status])
   @@index([genre])
@@ -71,7 +65,7 @@ model Subscriber {
   email     String   @unique
   name      String?
   createdAt DateTime @default(now())
-  status    String   @default("active") // active | unsubscribed
+  status    String   @default("active")
 }
 
 model ContactMessage {
@@ -84,19 +78,17 @@ model ContactMessage {
   read      Boolean  @default(false)
 }
 
-// User Authentication & Roles Model (Admin & User accounts)
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  passwordHash  String?
-  role          String    @default("user") // "admin" | "author" | "user"
-  avatarUrl     String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  sessions      Session[]
-  comments      Comment[]
+  id           String    @id @default(cuid())
+  name         String?
+  email        String    @unique
+  passwordHash String?
+  role         String    @default("user")
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  comments     Comment[]
+  sessions     Session[]
 
   @@index([email])
   @@index([role])
@@ -106,28 +98,25 @@ model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expires      DateTime
   createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  body      String
-  status    String   @default("approved") // "pending" | "approved" | "rejected"
-  postId    String?  // References blog post slug or ID
-  post      Post?    @relation(fields: [postId], references: [slug], onDelete: Cascade)
-  bookSlug  String?  // Optional reference to Book model
-  book      Book?    @relation(fields: [bookSlug], references: [slug], onDelete: Cascade)
-
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
+  id          String   @id @default(cuid())
+  body        String
+  status      String   @default("approved")
+  postId      String?
+  bookSlug    String?
+  userId      String?
   authorName  String?
   authorEmail String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  book        Book?    @relation(fields: [bookSlug], references: [slug], onDelete: Cascade)
+  post        Post?    @relation(fields: [postId], references: [slug], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
 
   @@index([status])
   @@index([postId])
@@ -138,20 +127,19 @@ model Post {
   slug           String    @id
   title          String
   excerpt        String
-  content        String    // Markdown / Rich text body
+  content        String
   category       String    @default("Chronicles")
-  tags           String    // comma-separated tags
+  tags           String
   coverUrl       String?
-  status         String    @default("published") // "draft" | "published"
+  status         String    @default("published")
   publishedAt    DateTime? @default(now())
   readingTime    String?
   authorName     String    @default("Nobi Kumar")
   seoTitle       String?
   seoDescription String?
-  comments       Comment[]
-
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  comments       Comment[]
 
   @@index([status])
   @@index([category])
