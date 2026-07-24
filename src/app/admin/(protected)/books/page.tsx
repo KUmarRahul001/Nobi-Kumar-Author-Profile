@@ -6,6 +6,8 @@ import * as React from 'react';
 import { prisma } from '@/lib/prisma';
 import AdminBooksClient from '@/components/admin/AdminBooksClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminBooksPage() {
   let books: any[] = [];
   try {
