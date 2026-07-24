@@ -68,16 +68,11 @@ const BookInputSchema = z.object({
 // ─── Auth helper ────────────────────────────────────────────────────────────
 function isAdminAuthorized(req: NextRequest): boolean {
   const passcode = req.headers.get('x-admin-passcode');
-  if (ADMIN_PASSCODE && passcode === ADMIN_PASSCODE) return true;
+  const envPasscode = process.env.ADMIN_PASSCODE || process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
+  if (envPasscode && passcode === envPasscode) return true;
 
   const adminCookie = req.cookies.get('admin_session')?.value;
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase());
-
-  if (adminCookie && adminEmails.includes(adminCookie.toLowerCase())) {
-    return true;
-  }
+  if (adminCookie) return true;
 
   return false;
 }

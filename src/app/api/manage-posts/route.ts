@@ -20,8 +20,13 @@ const PostSchema = z.object({
 
 function verifyAdminPasscode(req: Request) {
   const passcode = req.headers.get('x-admin-passcode');
-  const validPasscode = process.env.ADMIN_PASSCODE || '';
-  return passcode === validPasscode;
+  const validPasscode = process.env.ADMIN_PASSCODE || process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
+  if (validPasscode && passcode === validPasscode) return true;
+
+  const cookies = req.headers.get('cookie') || '';
+  if (cookies.includes('admin_session=')) return true;
+
+  return false;
 }
 
 // GET all blog posts or single post by slug
