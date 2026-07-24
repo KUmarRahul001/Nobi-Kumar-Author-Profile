@@ -24,7 +24,20 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      // 1. Try DB or ENV user credentials via /api/admin/login
+      // 1. Try native Supabase Auth first
+      const supabase = createClient();
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (!authError && authData.user) {
+        router.push('/admin');
+        router.refresh();
+        return;
+      }
+
+      // 2. Fallback to API route auth (/api/admin/login)
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,11 +52,10 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Friendly user error message without revealing internal DB connection details
       const userFriendlyError =
         data.error && !data.error.includes('prisma') && !data.error.includes("Can't reach")
           ? data.error
-          : 'Invalid email or password. Please try again.';
+          : authError?.message || 'Invalid email or password. Please try again.';
 
       setError(userFriendlyError);
       setLoading(false);
