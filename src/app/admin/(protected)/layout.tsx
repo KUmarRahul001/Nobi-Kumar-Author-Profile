@@ -39,9 +39,11 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0f]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#0a0a0f] text-white">
       <AdminSidebar userEmail={email} />
-      <main className="flex-1 ml-64 min-h-screen overflow-auto">{children}</main>
+      <main className="flex-1 w-full min-w-0 md:ml-64 min-h-screen overflow-x-hidden p-4 sm:p-6 md:p-8 lg:p-10">
+        {children}
+      </main>
     </div>
   );
 }

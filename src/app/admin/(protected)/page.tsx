@@ -71,23 +71,25 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-serif font-black text-white">Dashboard</h1>
-        <p className="text-sm text-white/40 mt-1 font-mono">Welcome back, {user?.email}</p>
+        <h1 className="text-2xl sm:text-3xl font-serif font-black text-white">Dashboard</h1>
+        <p className="text-xs sm:text-sm text-white/40 mt-1 font-mono truncate">
+          Welcome back, {user?.email}
+        </p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      {/* Stat cards grid: 1 col on mobile, 2 cols on tablet, 4 cols on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {cards.map((card) => (
           <a
             key={card.label}
             href={card.href}
-            className={`bg-gradient-to-br ${card.color} rounded-2xl p-6 border border-white/10 hover:scale-[1.02] transition-transform group`}
+            className={`bg-gradient-to-br ${card.color} rounded-2xl p-5 sm:p-6 border border-white/10 hover:scale-[1.02] active:scale-95 transition-all group shadow-lg`}
           >
-            <div className="text-3xl mb-3">{card.icon}</div>
-            <div className="text-4xl font-black text-white mb-1">{card.value}</div>
+            <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">{card.icon}</div>
+            <div className="text-3xl sm:text-4xl font-black text-white mb-1">{card.value}</div>
             <div className="text-xs font-mono text-white/60 group-hover:text-white/80 transition-colors">
               {card.label}
             </div>
@@ -96,11 +98,9 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick links */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest mb-5">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+        <h2 className="text-xs font-mono text-white/50 uppercase tracking-widest">Quick Actions</h2>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Add Book', href: '/admin/books/new', icon: '➕' },
             { label: 'View Site', href: '/', icon: '🌐', target: '_blank' },
@@ -111,10 +111,10 @@ export default async function AdminDashboard() {
               key={item.label}
               href={item.href}
               target={item.target}
-              className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 hover:text-white transition-all"
+              className="flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs sm:text-sm text-white/70 hover:text-white transition-all active:scale-95"
             >
-              <span>{item.icon}</span>
-              <span className="font-mono text-xs">{item.label}</span>
+              <span className="text-base">{item.icon}</span>
+              <span className="font-mono font-medium">{item.label}</span>
             </a>
           ))}
         </div>
