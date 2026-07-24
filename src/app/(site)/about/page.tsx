@@ -74,7 +74,7 @@ export default function AboutPage() {
           </p>
           <div className="pt-2">
             <a
-              href="https://ko-fi.com/nobikumar"
+              href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/nobikumar'}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-crimson hover:bg-crimson/90 text-white font-mono font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg hover:scale-105"

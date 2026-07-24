@@ -101,7 +101,7 @@ export default function Footer() {
             </p>
             <div>
               <a
-                href="https://ko-fi.com/nobikumar"
+                href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/nobikumar'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"

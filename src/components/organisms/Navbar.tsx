@@ -112,7 +112,7 @@ export default function Navbar({ books, posts }: NavbarProps) {
           {/* Action Toolbar */}
           <div className="flex items-center gap-3">
             <a
-              href="https://ko-fi.com/nobikumar"
+              href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/nobikumar'}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-600/40 hover:border-red-600 text-neutral-300 hover:text-white text-xs font-mono font-medium uppercase tracking-wider rounded-lg transition-all"
@@ -194,7 +194,7 @@ export default function Navbar({ books, posts }: NavbarProps) {
               Contact
             </Link>
             <a
-              href="https://ko-fi.com/nobikumar"
+              href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/nobikumar'}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}

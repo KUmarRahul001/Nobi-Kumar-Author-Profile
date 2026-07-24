@@ -4,7 +4,7 @@
  * Automatically appends associate tag to all Amazon store & paperback links
  */
 
-const DEFAULT_TAG = process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG || 'nobikumar-21';
+const DEFAULT_TAG = process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG || '';
 
 /**
  * Format an Amazon product URL to include the Amazon Associate tag
