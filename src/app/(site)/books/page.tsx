@@ -60,8 +60,6 @@ function mapDbToBook(dbBook: any): Book {
   };
 }
 
-import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
-
 async function loadBooksFromPrisma(): Promise<Book[]> {
   try {
     const dbBooks = await prisma.book.findMany({
@@ -70,9 +68,9 @@ async function loadBooksFromPrisma(): Promise<Book[]> {
     if (dbBooks && dbBooks.length > 0) {
       return dbBooks.map(mapDbToBook);
     }
-    return FALLBACK_BOOKS;
+    return [];
   } catch {
-    return FALLBACK_BOOKS;
+    return [];
   }
 }
 

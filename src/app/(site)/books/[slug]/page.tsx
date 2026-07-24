@@ -5,24 +5,11 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Book3DCover from '@/components/atoms/Book3DCover';
 
-interface BookPageProps {
-  params: Promise<{ slug: string }>;
-}
-
-import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
 import { getAmazonAffiliateLink, AMAZON_AFFILIATE_DISCLAIMER } from '@/lib/affiliate';
 import NewsletterSignup from '@/components/organisms/NewsletterSignup';
 
-function mapFallbackToPrismaFormat(b: any) {
-  return {
-    ...b,
-    amazonLink: b.buyLinks?.amazon || '',
-    googlePlayLink: b.buyLinks?.googlePlay || '',
-    appleBooksLink: b.buyLinks?.appleBooks || '',
-    pocketFmLink: b.buyLinks?.pocketFm || '',
-    kukuFmLink: b.buyLinks?.kukuFm || '',
-    audibleLink: b.buyLinks?.audible || '',
-  };
+interface BookPageProps {
+  params: Promise<{ slug: string }>;
 }
 
 async function getBookBySlugFromPrisma(slug: string) {
@@ -30,8 +17,7 @@ async function getBookBySlugFromPrisma(slug: string) {
     const book = await prisma.book.findUnique({ where: { slug } });
     if (book) return book;
   } catch {}
-  const fb = FALLBACK_BOOKS.find((b) => b.slug === slug);
-  return fb ? mapFallbackToPrismaFormat(fb) : null;
+  return null;
 }
 
 async function getAllBooksFromPrisma() {
@@ -39,7 +25,7 @@ async function getAllBooksFromPrisma() {
     const books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
     if (books && books.length > 0) return books;
   } catch {}
-  return FALLBACK_BOOKS.map(mapFallbackToPrismaFormat);
+  return [];
 }
 
 export async function generateMetadata({ params }: BookPageProps): Promise<Metadata> {

@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
-import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
 
 export const revalidate = 0;
 
@@ -44,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Load books dynamically from Prisma with fallback dataset
+  // Load books dynamically from Prisma
   let bookSlugs: string[] = [];
   try {
     const dbBooks = await prisma.book.findMany({
@@ -52,12 +51,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
     if (dbBooks && dbBooks.length > 0) {
       bookSlugs = dbBooks.map((b) => b.slug);
-    } else {
-      bookSlugs = FALLBACK_BOOKS.map((b) => b.slug);
     }
-  } catch {
-    bookSlugs = FALLBACK_BOOKS.map((b) => b.slug);
-  }
+  } catch {}
 
   const bookRoutes: MetadataRoute.Sitemap = bookSlugs.flatMap((slug) => [
     {
