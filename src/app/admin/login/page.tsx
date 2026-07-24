@@ -16,14 +16,15 @@ export default function AdminLoginPage() {
   const [magicSent, setMagicSent] = useState(false);
   const router = useRouter();
 
+  const [showPassword, setShowPassword] = useState(false);
+
   async function handlePasswordLogin(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const supabase = createClient();
 
     try {
-      // 1. Try DB user credentials via /api/admin/login
+      // 1. Try DB or ENV user credentials via /api/admin/login
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,25 +34,21 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Also sign into Supabase Auth if configured
-        await supabase.auth.signInWithPassword({ email, password }).catch(() => {});
         router.push('/admin');
         router.refresh();
         return;
       }
 
-      // 2. Fallback to Supabase Auth direct login
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      if (authError) {
-        setError(data.error || authError.message);
-        setLoading(false);
-        return;
-      }
+      // Friendly user error message without revealing internal DB connection details
+      const userFriendlyError =
+        data.error && !data.error.includes('prisma') && !data.error.includes("Can't reach")
+          ? data.error
+          : 'Invalid email or password. Please try again.';
 
-      router.push('/admin');
-      router.refresh();
+      setError(userFriendlyError);
+      setLoading(false);
     } catch {
-      setError('Failed to connect to authentication service.');
+      setError('Invalid email or password. Please try again.');
       setLoading(false);
     }
   }
@@ -68,7 +65,7 @@ export default function AdminLoginPage() {
     });
 
     if (authError) {
-      setError(authError.message);
+      setError('Unable to send magic link. Please check your email.');
       setLoading(false);
       return;
     }
@@ -143,24 +140,34 @@ export default function AdminLoginPage() {
                 />
               </div>
 
-              {/* Password (only for password mode) */}
+              {/* Password with Eye Show/Hide Toggle */}
               {mode === 'password' && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-white/50 uppercase tracking-wider">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-red-600/60 focus:ring-1 focus:ring-red-600/30 transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-red-600/60 focus:ring-1 focus:ring-red-600/30 transition-all pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white text-xs font-mono px-2 py-1 rounded transition-all select-none"
+                      aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+                    >
+                      {showPassword ? '👁 Hide' : '👁 Show'}
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {/* Error */}
+              {/* Sanitized User-Friendly Error */}
               {error && (
                 <div className="bg-red-900/30 border border-red-700/50 rounded-lg px-4 py-3 text-xs text-red-300 font-mono">
                   ⚠ {error}

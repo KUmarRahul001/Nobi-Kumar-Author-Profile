@@ -22,88 +22,77 @@ export async function POST(req: Request) {
 
     const { email, password } = parsed.data;
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
-    });
-
-    if (!user || !user.passwordHash) {
-      return NextResponse.json({ error: 'Invalid login credentials' }, { status: 401 });
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase().trim() },
+      });
+    } catch {
+      // DB unreachable or connection paused - will fallback to environment authentication below
     }
 
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid login credentials' }, { status: 401 });
+    if (user && user.passwordHash) {
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (isValid) {
+        const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+          .split(',')
+          .map((e) => e.trim().toLowerCase());
+
+        if (user.role === 'admin' || adminEmails.includes(user.email.toLowerCase())) {
+          const response = NextResponse.json({
+            success: true,
+            user: { id: user.id, email: user.email, name: user.name, role: user.role },
+          });
+
+          response.cookies.set('admin_session', user.email, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+          });
+
+          return response;
+        }
+      }
     }
 
-    // Check if user is an admin or in ADMIN_EMAILS
+    // 2. Environment Variables Fallback Check
     const adminEmails = (process.env.ADMIN_EMAILS ?? '')
       .split(',')
       .map((e) => e.trim().toLowerCase());
+    const envPasscode = process.env.ADMIN_PASSCODE;
 
-    if (user.role !== 'admin' && !adminEmails.includes(user.email.toLowerCase())) {
-      return NextResponse.json({ error: 'Access denied: Admin role required' }, { status: 403 });
+    if (
+      email &&
+      adminEmails.includes(email.toLowerCase().trim()) &&
+      envPasscode &&
+      password === envPasscode
+    ) {
+      const response = NextResponse.json({
+        success: true,
+        user: {
+          id: 'env-admin',
+          email,
+          name: 'System Admin',
+          role: 'admin',
+        },
+      });
+
+      response.cookies.set('admin_session', email, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return response;
     }
 
-    const response = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-    });
-
-    // Set auth cookie
-    response.cookies.set('admin_session', user.email, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
-
-    return response;
-  } catch (err: any) {
-    console.error('API Admin Login Error:', err);
-
-    // Fallback: Check if request matches environment ADMIN_PASSCODE & ADMIN_EMAILS
-    try {
-      const body = await req.clone().json();
-      const adminEmails = (process.env.ADMIN_EMAILS ?? '')
-        .split(',')
-        .map((e) => e.trim().toLowerCase());
-      const envPasscode = process.env.ADMIN_PASSCODE;
-
-      if (
-        body.email &&
-        adminEmails.includes(body.email.toLowerCase().trim()) &&
-        envPasscode &&
-        body.password === envPasscode
-      ) {
-        const response = NextResponse.json({
-          success: true,
-          user: {
-            id: 'env-admin',
-            email: body.email,
-            name: 'System Admin',
-            role: 'admin',
-          },
-        });
-
-        response.cookies.set('admin_session', body.email, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        });
-
-        return response;
-      }
-    } catch {}
-
-    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+  } catch {
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 400 });
   }
 }
 
