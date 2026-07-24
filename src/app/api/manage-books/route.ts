@@ -382,7 +382,25 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
     }
 
-    await prisma.book.delete({ where: { slug } });
+    try {
+      await prisma.book.delete({ where: { slug } });
+    } catch (dbErr: any) {
+      if (
+        dbErr?.message?.includes("Can't reach database server") ||
+        dbErr?.code === 'P1001' ||
+        dbErr?.code === 'P1002'
+      ) {
+        // Database connection paused or unreachable on Supabase
+        return NextResponse.json(
+          {
+            error:
+              'Database server connection paused on Supabase. Please resume your project in Supabase Dashboard or try again in a few seconds.',
+          },
+          { status: 503 }
+        );
+      }
+      throw dbErr;
+    }
 
     // Invalidate cache
     try {
