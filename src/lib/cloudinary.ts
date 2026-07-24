@@ -5,10 +5,23 @@
  */
 import { v2 as cloudinary } from 'cloudinary';
 
+const cloudName =
+  process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (!cloudName || !apiKey || !apiSecret) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Missing required Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).'
+    );
+  }
+}
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-  api_key: process.env.CLOUDINARY_API_KEY!,
-  api_secret: process.env.CLOUDINARY_API_SECRET!,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
   secure: true,
 });
 
@@ -52,41 +65,33 @@ export async function uploadToCloudinary(
   folder: string = CLOUDINARY_FOLDERS.BOOKS,
   publicId?: string
 ): Promise<{ url: string; publicId: string; width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const uploadOptions: Record<string, unknown> = {
-      folder,
-      resource_type: 'image',
-      quality: 'auto',
-      fetch_format: 'auto',
-      ...(publicId ? { public_id: publicId, overwrite: true } : {}),
-    };
+  const uploadOptions: Record<string, unknown> = {
+    folder,
+    resource_type: 'image',
+    ...(publicId ? { public_id: publicId, overwrite: true } : {}),
+  };
 
-    const uploadStream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
-      if (error || !result) return reject(error ?? new Error('Upload failed'));
-      resolve({
-        url: result.secure_url,
-        publicId: result.public_id,
-        width: result.width,
-        height: result.height,
-      });
-    });
+  let result;
+  if (typeof fileBuffer === 'string' && fileBuffer.startsWith('http')) {
+    result = await cloudinary.uploader.upload(fileBuffer, uploadOptions);
+  } else {
+    // Convert Buffer or base64 to base64 Data URI
+    const base64Payload =
+      typeof fileBuffer === 'string'
+        ? fileBuffer.startsWith('data:')
+          ? fileBuffer
+          : `data:image/png;base64,${fileBuffer}`
+        : `data:image/png;base64,${fileBuffer.toString('base64')}`;
 
-    if (typeof fileBuffer === 'string') {
-      cloudinary.uploader
-        .upload(fileBuffer, uploadOptions)
-        .then((result) =>
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-            width: result.width,
-            height: result.height,
-          })
-        )
-        .catch(reject);
-    } else {
-      uploadStream.end(fileBuffer);
-    }
-  });
+    result = await cloudinary.uploader.upload(base64Payload, uploadOptions);
+  }
+
+  return {
+    url: result.secure_url,
+    publicId: result.public_id,
+    width: result.width,
+    height: result.height,
+  };
 }
 
 /**
