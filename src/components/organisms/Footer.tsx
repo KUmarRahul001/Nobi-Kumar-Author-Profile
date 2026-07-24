@@ -94,6 +94,24 @@ export default function Footer() {
             </a>
           </div>
 
+          {/* Ko-fi Support Block */}
+          <div className="p-4 rounded-xl bg-card/60 border border-border/60 space-y-2 text-left md:text-right">
+            <p className="text-xs font-mono text-foreground font-semibold">
+              Enjoying my stories? Support my writing on Ko-fi.
+            </p>
+            <div>
+              <a
+                href="https://ko-fi.com/nobikumar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"
+                aria-label="Support Nobi Kumar on Ko-fi"
+              >
+                <span>☕ Support on Ko-fi</span>
+              </a>
+            </div>
+          </div>
+
           <div className="text-[10px] font-mono text-muted space-y-1">
             <p>© {currentYear} Nobi Kumar. All rights reserved.</p>
             <p>Designed for psychological thriller and mystery readers.</p>

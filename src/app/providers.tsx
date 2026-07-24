@@ -5,6 +5,8 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
 import Clarity from '@microsoft/clarity';
 
+import KofiWidget from '@/components/atoms/KofiWidget';
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
@@ -28,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       {children}
+      <KofiWidget />
     </NextThemesProvider>
   );
 }

@@ -96,6 +96,12 @@ export default function Navbar({ books, posts }: NavbarProps) {
               Chronicles
             </Link>
             <Link
+              href="/about"
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 transition-colors"
+            >
+              About
+            </Link>
+            <Link
               href="/contact"
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 transition-colors"
             >
@@ -105,6 +111,16 @@ export default function Navbar({ books, posts }: NavbarProps) {
 
           {/* Action Toolbar */}
           <div className="flex items-center gap-3">
+            <a
+              href="https://ko-fi.com/nobikumar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"
+              aria-label="Support My Writing on Ko-fi"
+            >
+              <span>☕ Support My Writing</span>
+            </a>
+
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all"
@@ -164,12 +180,29 @@ export default function Navbar({ books, posts }: NavbarProps) {
               Chronicles
             </Link>
             <Link
+              href="/about"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 py-1 w-full"
+            >
+              About
+            </Link>
+            <Link
               href="/contact"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 py-1 w-full"
             >
               Contact
             </Link>
+            <a
+              href="https://ko-fi.com/nobikumar"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mt-2 inline-flex items-center justify-center gap-2 w-full px-4 py-2 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"
+              aria-label="Support My Writing on Ko-fi"
+            >
+              <span>☕ Support My Writing</span>
+            </a>
           </div>
         )}
       </nav>

@@ -231,6 +231,31 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                     {AMAZON_AFFILIATE_DISCLAIMER}
                   </p>
                 </div>
+
+                {/* Ko-fi Support Card */}
+                <div className="pt-4 border-t border-border/40 p-4 rounded-xl bg-card/60 border border-border/60 space-y-3">
+                  <div>
+                    <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-crimson">
+                      Love this story? Help me write the next one.
+                    </h4>
+                    <p className="text-xs text-muted mt-1 leading-relaxed">
+                      Writing independent psychological thrillers requires hours of research,
+                      world-building, and late-night revisions. Your support directly funds the next
+                      chapter.
+                    </p>
+                  </div>
+                  <div>
+                    <a
+                      href="https://ko-fi.com/nobikumar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-md"
+                      aria-label="Support Nobi Kumar on Ko-fi"
+                    >
+                      <span>☕ Support on Ko-fi</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
