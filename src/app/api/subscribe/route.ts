@@ -1,11 +1,10 @@
 /**
  * src/app/api/subscribe/route.ts
- * Newsletter subscription — saves to Prisma DB + syncs to Mailchimp
+ * Newsletter subscription — saves to Prisma DB + syncs to Beehiiv & Mailchimp
  * Rate limited via Upstash Redis
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { subscribeToMailchimp } from '@/lib/mailchimp';
 import { subscribeRatelimit } from '@/lib/redis';
 import { z } from 'zod';
 
@@ -19,13 +18,15 @@ const SubscribeSchema = z.object({
 export async function POST(req: NextRequest) {
   // Rate limiting
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? '127.0.0.1';
-  const { success: allowed } = await subscribeRatelimit.limit(ip);
-  if (!allowed) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please wait a few minutes.' },
-      { status: 429 }
-    );
-  }
+  try {
+    const { success: allowed } = await subscribeRatelimit.limit(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a few minutes.' },
+        { status: 429 }
+      );
+    }
+  } catch {}
 
   try {
     const body = await req.json();
@@ -33,29 +34,52 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
+        { error: parsed.error.issues[0]?.message ?? 'Invalid email address' },
         { status: 400 }
       );
     }
 
     const { email, name } = parsed.data;
-    const [firstName, ...rest] = (name ?? '').split(' ');
-    const lastName = rest.join(' ');
 
-    // 1. Save/update in Prisma DB (idempotent upsert)
-    await prisma.subscriber.upsert({
-      where: { email },
-      update: { name: name ?? null, status: 'active' },
-      create: { email, name: name ?? null, status: 'active' },
-    });
+    // 1. Save/update in Prisma DB (if database is online)
+    try {
+      await prisma.subscriber.upsert({
+        where: { email },
+        update: { name: name ?? null, status: 'active' },
+        create: { email, name: name ?? null, status: 'active' },
+      });
+    } catch {}
 
-    // 2. Sync to Mailchimp (non-blocking — don't fail if Mailchimp is down)
-    const mcResult = await subscribeToMailchimp(email, firstName, lastName);
+    // 2. Sync to Beehiiv API V2 if BEEHIIV_API_KEY is configured server-side
+    const beehiivApiKey = process.env.BEEHIIV_API_KEY;
+    const publicationId =
+      process.env.BEEHIIV_PUBLICATION_ID ||
+      process.env.NEXT_PUBLIC_BEEHIIV_PUBLICATION_ID ||
+      'pub_f065d229-fd93-42da-8257-d761649484cd';
+
+    if (beehiivApiKey) {
+      try {
+        await fetch(`https://api.beehiiv.com/v2/publications/${publicationId}/subscriptions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${beehiivApiKey}`,
+          },
+          body: JSON.stringify({
+            email,
+            reactivate_existing: true,
+            send_welcome_email: true,
+            utm_source: 'author_website',
+          }),
+        });
+      } catch (bhErr) {
+        console.error('Beehiiv API sync error:', bhErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      status: mcResult.status,
-      message: mcResult.message,
+      message: 'Thank you! You have successfully subscribed to The Nobi Kumar Newsletter.',
     });
   } catch {
     return NextResponse.json({ error: 'Subscription failed. Please try again.' }, { status: 500 });

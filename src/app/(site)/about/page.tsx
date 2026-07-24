@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import NewsletterSignup from '@/components/organisms/NewsletterSignup';
 
 export const metadata: Metadata = {
   title: 'About Nobi Kumar | Author & Storyteller',
@@ -84,6 +85,14 @@ export default function AboutPage() {
             </a>
           </div>
         </section>
+
+        {/* Beehiiv Newsletter Section */}
+        <NewsletterSignup
+          title="Stay Inside The Nobi Narrative Universe"
+          subtitle="Subscribe to receive exclusive author updates, early release announcements, and behind-the-scenes case files."
+          variant="card"
+          className="max-w-2xl mx-auto"
+        />
 
         {/* Back Links */}
         <div className="text-center pt-4">

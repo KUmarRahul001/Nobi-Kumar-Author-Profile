@@ -11,6 +11,7 @@ interface BookPageProps {
 
 import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
 import { getAmazonAffiliateLink, AMAZON_AFFILIATE_DISCLAIMER } from '@/lib/affiliate';
+import NewsletterSignup from '@/components/organisms/NewsletterSignup';
 
 function mapFallbackToPrismaFormat(b: any) {
   return {
@@ -268,6 +269,15 @@ export default async function BookDetailPage({ params }: BookPageProps) {
               />
             </div>
           </div>
+        </div>
+
+        {/* Beehiiv Newsletter Signup Card */}
+        <div className="mt-12">
+          <NewsletterSignup
+            title={`Enjoyed reading about ${currentBook.title}?`}
+            subtitle="Subscribe to get notified first when the next book in the series releases, plus access to secret author case files."
+            variant="card"
+          />
         </div>
       </div>
     </div>

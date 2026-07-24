@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
-import NewsletterForm from './NewsletterForm';
+import NewsletterSignup from './NewsletterSignup';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,9 +11,13 @@ export default function Footer() {
       role="contentinfo"
     >
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        {/* Newsletter Signup Form Widget (FR-08) */}
+        {/* Beehiiv Newsletter Signup (Footer) */}
         <div className="space-y-4">
-          <NewsletterForm />
+          <NewsletterSignup
+            variant="inline"
+            title="The Nobi Kumar Newsletter"
+            subtitle="Subscribe to receive classified case file alerts, early chapter previews, and thriller insights."
+          />
         </div>
 
         {/* Dynamic Navigation Sitemaps and Copyright Claims */}

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
+import NewsletterSignup from './NewsletterSignup';
 
 export default function HeroSection() {
   return (
@@ -99,6 +100,17 @@ export default function HeroSection() {
             src="/assets/nobi-signature.png"
             alt="Nobi Kumar Signature Logo"
             className="h-16 w-auto object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Hero Beehiiv Newsletter Banner */}
+      <div className="w-full bg-neutral-950 border-t border-neutral-800 p-6 md:p-8 z-20">
+        <div className="max-w-4xl mx-auto">
+          <NewsletterSignup
+            variant="hero"
+            title="The Nobi Kumar Newsletter"
+            subtitle="Get secret author updates, early release announcements, and exclusive case files delivered straight to your inbox."
           />
         </div>
       </div>
