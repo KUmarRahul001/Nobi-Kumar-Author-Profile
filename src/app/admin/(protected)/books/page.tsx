@@ -6,11 +6,25 @@ import * as React from 'react';
 import { prisma } from '@/lib/prisma';
 import AdminBooksClient from '@/components/admin/AdminBooksClient';
 
+import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
+
 export default async function AdminBooksPage() {
   let books: any[] = [];
   try {
     books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
   } catch {}
+
+  if (!books || books.length === 0) {
+    books = FALLBACK_BOOKS.map((b) => ({
+      slug: b.slug,
+      title: b.title,
+      genre: b.genre,
+      status: b.status,
+      isFeatured: b.isFeatured,
+      coverUrl: b.coverUrl,
+      releaseDate: b.releaseDate,
+    }));
+  }
 
   return (
     <div className="p-8 space-y-6">
