@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { redis, cacheGet, cacheSet, cacheDel } from '@/lib/redis';
 
@@ -18,13 +19,26 @@ const PostSchema = z.object({
   seoDescription: z.string().nullable().optional(),
 });
 
-function verifyAdminPasscode(req: Request) {
+async function verifyAdminPasscode(req: Request): Promise<boolean> {
+  const cookiesHeader = req.headers.get('cookie') || '';
+  if (cookiesHeader.includes('admin_session=')) return true;
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && user.email) {
+      const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase());
+      if (adminEmails.includes(user.email.toLowerCase())) return true;
+    }
+  } catch {}
+
   const passcode = req.headers.get('x-admin-passcode');
   const validPasscode = process.env.ADMIN_PASSCODE || process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
   if (validPasscode && passcode === validPasscode) return true;
-
-  const cookies = req.headers.get('cookie') || '';
-  if (cookies.includes('admin_session=')) return true;
 
   return false;
 }
@@ -73,7 +87,7 @@ export async function GET(req: Request) {
 
 // POST create blog post
 export async function POST(req: Request) {
-  if (!verifyAdminPasscode(req)) {
+  if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
   }
 
@@ -105,7 +119,7 @@ export async function POST(req: Request) {
 
 // PUT update blog post
 export async function PUT(req: Request) {
-  if (!verifyAdminPasscode(req)) {
+  if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
   }
 
@@ -139,7 +153,7 @@ export async function PUT(req: Request) {
 
 // DELETE post
 export async function DELETE(req: Request) {
-  if (!verifyAdminPasscode(req)) {
+  if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
   }
 

@@ -36,8 +36,11 @@ export default function AdminBooksClient({ books: initialBooks }: { books: Book[
       if (res.ok) {
         setBooks((prev) => prev.filter((b) => b.slug !== slug));
       } else {
-        alert('Failed to delete book.');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || `Failed to delete book (Status: ${res.status}).`);
       }
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete book.');
     } finally {
       setDeleting(null);
     }
