@@ -10,10 +10,13 @@ export default async function AdminBooksPage() {
   let books: any[] = [];
   try {
     const supabase = await createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('Book')
       .select('*')
       .order('displayOrder', { ascending: true });
+    if (error) {
+      console.error('[Supabase Error - Admin Books]', error);
+    }
     if (data) books = data;
   } catch (err) {
     console.error('Failed to fetch books from database:', err);

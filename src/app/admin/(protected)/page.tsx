@@ -15,13 +15,19 @@ async function getStats() {
       supabase.from('ContactMessage').select('*', { count: 'exact', head: true }).eq('read', false),
     ]);
 
+    if (booksRes.error) console.error('[Supabase Error - Books]', booksRes.error);
+    if (postsRes.error) console.error('[Supabase Error - Posts]', postsRes.error);
+    if (subsRes.error) console.error('[Supabase Error - Subscribers]', subsRes.error);
+    if (msgsRes.error) console.error('[Supabase Error - Messages]', msgsRes.error);
+
     return {
       books: booksRes.count || 0,
       posts: postsRes.count || 0,
       subscribers: subsRes.count || 0,
       unreadMessages: msgsRes.count || 0,
     };
-  } catch {
+  } catch (error) {
+    console.error('[Supabase Exception in getStats]', error);
     return { books: 0, posts: 0, subscribers: 0, unreadMessages: 0 };
   }
 }

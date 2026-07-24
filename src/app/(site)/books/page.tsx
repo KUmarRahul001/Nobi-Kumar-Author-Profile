@@ -71,11 +71,17 @@ async function loadBooksFromSupabase(): Promise<Book[]> {
       .select('*')
       .order('displayOrder', { ascending: true });
 
-    if (!error && dbBooks && dbBooks.length > 0) {
+    if (error) {
+      console.error('[Supabase Error - Site Books]', error);
+      return [];
+    }
+
+    if (dbBooks && dbBooks.length > 0) {
       return dbBooks.map(mapDbToBook);
     }
     return [];
-  } catch {
+  } catch (error) {
+    console.error('[Supabase Exception in loadBooksFromSupabase]', error);
     return [];
   }
 }
