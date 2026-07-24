@@ -20,7 +20,7 @@ const PostSchema = z.object({
 
 function verifyAdminPasscode(req: Request) {
   const passcode = req.headers.get('x-admin-passcode');
-  const validPasscode = process.env.ADMIN_PASSCODE || 'Rkraj@8789';
+  const validPasscode = process.env.ADMIN_PASSCODE || '';
   return passcode === validPasscode;
 }
 

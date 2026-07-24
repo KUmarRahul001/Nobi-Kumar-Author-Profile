@@ -31,7 +31,7 @@ export default function AdminBlogClient({ posts: initialPosts }: { posts: Post[]
       const res = await fetch(`/api/manage-posts?slug=${slug}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-passcode': process.env.NEXT_PUBLIC_ADMIN_PASSCODE || 'Rkraj@8789',
+          'x-admin-passcode': process.env.NEXT_PUBLIC_ADMIN_PASSCODE || '',
         },
       });
 

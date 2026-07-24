@@ -152,7 +152,7 @@ export default function EditBookPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-passcode': process.env.NEXT_PUBLIC_ADMIN_PASSCODE || 'Rkraj@8789',
+          'x-admin-passcode': process.env.NEXT_PUBLIC_ADMIN_PASSCODE || '',
         },
         body: JSON.stringify(payload),
       });

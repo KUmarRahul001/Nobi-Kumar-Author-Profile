@@ -8,11 +8,10 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export const runtime = 'nodejs'; // Cloudinary SDK requires Node.js
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? 'nobi2026';
-
-function passcodeMatch(passcode: string | null): boolean {
-  if (!passcode) return false;
-  return passcode === ADMIN_PASSCODE || passcode === 'Rkraj@8789';
+function verifyAdminPasscode(req: Request) {
+  const passcode = req.headers.get('x-admin-passcode');
+  const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
+  return ADMIN_PASSCODE && passcode === ADMIN_PASSCODE;
 }
 
 function isValidImageSignature(buffer: Buffer): boolean {
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
       .split(',')
       .map((e) => e.trim().toLowerCase());
     const isAuthorized =
-      passcodeMatch(adminPasscode) ||
+      verifyAdminPasscode(req) ||
       Boolean(adminCookie && adminEmails.includes(adminCookie.toLowerCase()));
 
     if (!isAuthorized) {

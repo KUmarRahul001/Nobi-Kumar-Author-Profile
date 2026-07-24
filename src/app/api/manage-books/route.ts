@@ -21,7 +21,7 @@ export const runtime = 'nodejs';
 
 const CACHE_KEY_ALL = 'books:all';
 const CACHE_KEY_BOOK = (slug: string) => `books:${slug}`;
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? 'nobi2026';
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
 
 const BookInputSchema = z.object({
   slug: z.string().optional(),
@@ -68,7 +68,7 @@ const BookInputSchema = z.object({
 // ─── Auth helper ────────────────────────────────────────────────────────────
 function isAdminAuthorized(req: NextRequest): boolean {
   const passcode = req.headers.get('x-admin-passcode');
-  if (passcode === ADMIN_PASSCODE || passcode === 'Rkraj@8789') return true;
+  if (ADMIN_PASSCODE && passcode === ADMIN_PASSCODE) return true;
 
   const adminCookie = req.cookies.get('admin_session')?.value;
   const adminEmails = (process.env.ADMIN_EMAILS ?? '')
@@ -371,11 +371,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
     }
 
-    try {
-      await prisma.book.delete({ where: { slug } });
-    } catch {
-      // If DB is offline/unreachable, deletion completes on client state
-    }
+    await prisma.book.delete({ where: { slug } });
 
     // Invalidate cache
     try {

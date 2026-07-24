@@ -10,11 +10,14 @@ import { FALLBACK_BOOKS } from '@/data/fallbackBooks';
 
 export default async function AdminBooksPage() {
   let books: any[] = [];
+  let dbError = false;
   try {
     books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
-  } catch {}
+  } catch {
+    dbError = true;
+  }
 
-  if (!books || books.length === 0) {
+  if (dbError && (!books || books.length === 0)) {
     books = FALLBACK_BOOKS.map((b) => ({
       slug: b.slug,
       title: b.title,
