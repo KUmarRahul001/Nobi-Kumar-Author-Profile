@@ -3,14 +3,17 @@
  * Admin Subscribers — view newsletter subscribers
  */
 import * as React from 'react';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminSubscribersPage() {
   let subscribers: any[] = [];
   try {
-    subscribers = await prisma.subscriber.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('Subscriber')
+      .select('*')
+      .order('createdAt', { ascending: false });
+    if (data) subscribers = data;
   } catch {}
 
   const active = subscribers.filter((s) => s.status === 'active').length;

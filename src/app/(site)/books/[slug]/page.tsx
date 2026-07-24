@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import Book3DCover from '@/components/atoms/Book3DCover';
 
@@ -12,17 +12,22 @@ interface BookPageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getBookBySlugFromPrisma(slug: string) {
+async function getBookBySlugFromSupabase(slug: string) {
   try {
-    const book = await prisma.book.findUnique({ where: { slug } });
+    const supabase = await createClient();
+    const { data: book } = await supabase.from('Book').select('*').eq('slug', slug).single();
     if (book) return book;
   } catch {}
   return null;
 }
 
-async function getAllBooksFromPrisma() {
+async function getAllBooksFromSupabase() {
   try {
-    const books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
+    const supabase = await createClient();
+    const { data: books } = await supabase
+      .from('Book')
+      .select('*')
+      .order('displayOrder', { ascending: true });
     if (books && books.length > 0) return books;
   } catch {}
   return [];
@@ -30,7 +35,7 @@ async function getAllBooksFromPrisma() {
 
 export async function generateMetadata({ params }: BookPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const book = await getBookBySlugFromPrisma(slug);
+  const book = await getBookBySlugFromSupabase(slug);
 
   if (!book) {
     return { title: 'Book Not Found | Nobi Kumar' };
@@ -44,8 +49,8 @@ export async function generateMetadata({ params }: BookPageProps): Promise<Metad
 
 export default async function BookDetailPage({ params }: BookPageProps) {
   const { slug } = await params;
-  const currentBook = await getBookBySlugFromPrisma(slug);
-  const allBooks = await getAllBooksFromPrisma();
+  const currentBook = await getBookBySlugFromSupabase(slug);
+  const allBooks = await getAllBooksFromSupabase();
 
   if (!currentBook) {
     notFound();

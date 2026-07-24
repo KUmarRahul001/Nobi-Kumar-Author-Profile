@@ -3,13 +3,18 @@
  * Admin Books Management — list, add, edit, delete books
  */
 import * as React from 'react';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import AdminBooksClient from '@/components/admin/AdminBooksClient';
 
 export default async function AdminBooksPage() {
   let books: any[] = [];
   try {
-    books = await prisma.book.findMany({ orderBy: { displayOrder: 'asc' } });
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('Book')
+      .select('*')
+      .order('displayOrder', { ascending: true });
+    if (data) books = data;
   } catch (err) {
     console.error('Failed to fetch books from database:', err);
   }

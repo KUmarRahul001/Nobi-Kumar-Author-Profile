@@ -4,7 +4,7 @@
  * Rate limited via Upstash Redis
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { contactRatelimit } from '@/lib/redis';
 import { z } from 'zod';
 
@@ -55,14 +55,17 @@ export async function POST(req: NextRequest) {
 
     const { name, email, subject, message } = parsed.data;
 
-    await prisma.contactMessage.create({
-      data: {
-        name: sanitize(name),
-        email: sanitize(email),
-        subject: subject ? sanitize(subject) : null,
-        message: sanitize(message),
-      },
+    const supabase = await createClient();
+    const { error: dbError } = await supabase.from('ContactMessage').insert({
+      name: sanitize(name),
+      email: sanitize(email),
+      subject: subject ? sanitize(subject) : null,
+      message: sanitize(message),
     });
+
+    if (dbError) {
+      return NextResponse.json({ error: 'Failed to send message.' }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,

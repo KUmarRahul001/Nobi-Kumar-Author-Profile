@@ -4,17 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "prepare": "husky",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:prod": "prisma migrate deploy",
-    "db:studio": "prisma studio",
-    "db:generate": "prisma generate"
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -27,8 +21,6 @@
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@microsoft/clarity": "^1.0.2",
     "@next/third-parties": "^16.2.11",
-    "@prisma/adapter-pg": "^7.9.0",
-    "@prisma/client": "^7.9.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.8",
     "@upstash/ratelimit": "^2.0.8",
@@ -71,7 +63,6 @@
     "lint-staged": "^17.1.0",
     "postcss": "^8.5.1",
     "prettier": "^3.9.6",
-    "prisma": "^7.9.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3",
     "vitest": "^4.1.10"

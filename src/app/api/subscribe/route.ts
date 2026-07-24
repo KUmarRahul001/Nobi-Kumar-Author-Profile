@@ -4,7 +4,7 @@
  * Rate limited via Upstash Redis
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { subscribeRatelimit } from '@/lib/redis';
 import { z } from 'zod';
 
@@ -41,13 +41,12 @@ export async function POST(req: NextRequest) {
 
     const { email, name } = parsed.data;
 
-    // 1. Save/update in Prisma DB (if database is online)
+    // 1. Save/update in Supabase DB
     try {
-      await prisma.subscriber.upsert({
-        where: { email },
-        update: { name: name ?? null, status: 'active' },
-        create: { email, name: name ?? null, status: 'active' },
-      });
+      const supabase = await createClient();
+      await supabase
+        .from('Subscriber')
+        .upsert({ email, name: name ?? null, status: 'active' }, { onConflict: 'email' });
     } catch {}
 
     // 2. Sync to Beehiiv API V2 if BEEHIIV_API_KEY is configured server-side

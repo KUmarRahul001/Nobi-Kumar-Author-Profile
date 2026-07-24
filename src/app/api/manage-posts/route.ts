@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
-import { redis, cacheGet, cacheSet, cacheDel } from '@/lib/redis';
+import { cacheGet, cacheSet, cacheDel } from '@/lib/redis';
 
 const PostSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -43,24 +42,26 @@ async function verifyAdminPasscode(req: Request): Promise<boolean> {
   return false;
 }
 
-// GET all blog posts or single post by slug
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const slug = searchParams.get('slug');
     const status = searchParams.get('status');
 
+    const supabase = await createClient();
+
     if (slug) {
       const cacheKey = `posts:${slug}`;
       const cached = await cacheGet(cacheKey);
       if (cached) return NextResponse.json(cached);
 
-      const post = await prisma.post.findUnique({
-        where: { slug },
-        include: { comments: true },
-      });
+      const { data: post, error } = await supabase
+        .from('Post')
+        .select('*, comments:Comment(*)')
+        .eq('slug', slug)
+        .single();
 
-      if (!post) {
+      if (error || !post) {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 });
       }
 
@@ -72,11 +73,13 @@ export async function GET(req: Request) {
     const cached = await cacheGet(cacheKey);
     if (cached) return NextResponse.json(cached);
 
-    const whereClause = status ? { status } : {};
-    const posts = await prisma.post.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' },
-    });
+    let query = supabase.from('Post').select('*').order('createdAt', { ascending: false });
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data: posts, error } = await query;
+    if (error) throw error;
 
     await cacheSet(cacheKey, posts, 300);
     return NextResponse.json(posts);
@@ -85,7 +88,6 @@ export async function GET(req: Request) {
   }
 }
 
-// POST create blog post
 export async function POST(req: Request) {
   if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
@@ -95,12 +97,19 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validated = PostSchema.parse(body);
 
-    const post = await prisma.post.create({
-      data: {
+    const supabase = await createClient();
+    const { data: post, error } = await supabase
+      .from('Post')
+      .insert({
         ...validated,
-        publishedAt: validated.publishedAt ? new Date(validated.publishedAt) : new Date(),
-      },
-    });
+        publishedAt: validated.publishedAt
+          ? new Date(validated.publishedAt).toISOString()
+          : new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
 
     await cacheDel('posts:all');
     await cacheDel(`posts:${post.slug}`);
@@ -117,7 +126,6 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT update blog post
 export async function PUT(req: Request) {
   if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
@@ -128,13 +136,21 @@ export async function PUT(req: Request) {
     const { originalSlug, ...data } = body;
     const validated = PostSchema.parse(data);
 
-    const post = await prisma.post.update({
-      where: { slug: originalSlug || validated.slug },
-      data: {
+    const supabase = await createClient();
+    const targetSlug = originalSlug || validated.slug;
+    const { data: post, error } = await supabase
+      .from('Post')
+      .update({
         ...validated,
-        publishedAt: validated.publishedAt ? new Date(validated.publishedAt) : new Date(),
-      },
-    });
+        publishedAt: validated.publishedAt
+          ? new Date(validated.publishedAt).toISOString()
+          : new Date().toISOString(),
+      })
+      .eq('slug', targetSlug)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     await cacheDel('posts:all');
     await cacheDel(`posts:${post.slug}`);
@@ -151,7 +167,6 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE post
 export async function DELETE(req: Request) {
   if (!(await verifyAdminPasscode(req))) {
     return NextResponse.json({ error: 'Unauthorized: Invalid admin passcode' }, { status: 401 });
@@ -165,7 +180,10 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Slug parameter is required' }, { status: 400 });
     }
 
-    await prisma.post.delete({ where: { slug } });
+    const supabase = await createClient();
+    const { error } = await supabase.from('Post').delete().eq('slug', slug);
+    if (error) throw error;
+
     await cacheDel('posts:all');
     await cacheDel(`posts:${slug}`);
 

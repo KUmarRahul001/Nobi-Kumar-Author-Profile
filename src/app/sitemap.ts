@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 0;
 
@@ -43,12 +43,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Load books dynamically from Prisma
+  // Load books dynamically from Supabase
   let bookSlugs: string[] = [];
   try {
-    const dbBooks = await prisma.book.findMany({
-      select: { slug: true },
-    });
+    const supabase = await createClient();
+    const { data: dbBooks } = await supabase.from('Book').select('slug');
     if (dbBooks && dbBooks.length > 0) {
       bookSlugs = dbBooks.map((b) => b.slug);
     }
@@ -69,13 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]);
 
-  // Load blog posts dynamically from Prisma
+  // Load blog posts dynamically from Supabase
   let blogSlugs: string[] = ['welcome-to-the-universe'];
   try {
-    const dbPosts = await prisma.post.findMany({
-      where: { status: 'published' },
-      select: { slug: true, publishedAt: true },
-    });
+    const supabase = await createClient();
+    const { data: dbPosts } = await supabase
+      .from('Post')
+      .select('slug, publishedAt')
+      .eq('status', 'published');
     if (dbPosts && dbPosts.length > 0) {
       blogSlugs = dbPosts.map((p) => p.slug);
     }

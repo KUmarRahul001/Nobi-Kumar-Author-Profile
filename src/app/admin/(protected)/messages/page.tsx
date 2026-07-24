@@ -3,14 +3,17 @@
  * Admin Messages — view contact form submissions
  */
 import * as React from 'react';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminMessagesPage() {
   let messages: any[] = [];
   try {
-    messages = await prisma.contactMessage.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('ContactMessage')
+      .select('*')
+      .order('createdAt', { ascending: false });
+    if (data) messages = data;
   } catch {}
 
   return (

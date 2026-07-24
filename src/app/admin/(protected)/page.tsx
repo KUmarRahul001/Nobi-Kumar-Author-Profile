@@ -4,18 +4,23 @@
  */
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { prisma } from '@/lib/prisma';
 
 async function getStats() {
   try {
-    const [books, posts, subscribers, messages] = await Promise.all([
-      prisma.book.count(),
-      prisma.post.count(),
-      prisma.subscriber.count(),
-      prisma.contactMessage.count({ where: { read: false } }),
+    const supabase = await createClient();
+    const [booksRes, postsRes, subsRes, msgsRes] = await Promise.all([
+      supabase.from('Book').select('*', { count: 'exact', head: true }),
+      supabase.from('Post').select('*', { count: 'exact', head: true }),
+      supabase.from('Subscriber').select('*', { count: 'exact', head: true }),
+      supabase.from('ContactMessage').select('*', { count: 'exact', head: true }).eq('read', false),
     ]);
 
-    return { books, posts, subscribers, unreadMessages: messages };
+    return {
+      books: booksRes.count || 0,
+      posts: postsRes.count || 0,
+      subscribers: subsRes.count || 0,
+      unreadMessages: msgsRes.count || 0,
+    };
   } catch {
     return { books: 0, posts: 0, subscribers: 0, unreadMessages: 0 };
   }

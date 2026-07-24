@@ -5,7 +5,6 @@
  * Rate limited: 100 reads/min public, 20 writes/min admin
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import {
   cacheGet,
@@ -22,7 +21,6 @@ export const runtime = 'nodejs';
 
 const CACHE_KEY_ALL = 'books:all';
 const CACHE_KEY_BOOK = (slug: string) => `books:${slug}`;
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
 
 const BookInputSchema = z.object({
   slug: z.string().optional(),
@@ -67,11 +65,9 @@ const BookInputSchema = z.object({
 });
 
 async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
-  // 1. Check admin_session cookie
   const adminCookie = req.cookies.get('admin_session')?.value;
   if (adminCookie) return true;
 
-  // 2. Check Supabase Auth session via cookies
   try {
     const supabase = await createClient();
     const {
@@ -85,7 +81,6 @@ async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
     }
   } catch {}
 
-  // 3. Fallback header check
   const passcode = req.headers.get('x-admin-passcode');
   const envPasscode = process.env.ADMIN_PASSCODE || process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
   if (envPasscode && passcode === envPasscode) return true;
@@ -93,7 +88,6 @@ async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
   return false;
 }
 
-// ─── Mapping helpers ─────────────────────────────────────────────────────────
 function mapDbToBook(db: any): Book {
   return {
     slug: db.slug,
@@ -138,7 +132,9 @@ function mapDbToBook(db: any): Book {
     ageRating: db.ageRating ?? '',
     contentWarning: db.contentWarning ?? '',
     lastUpdated:
-      db.lastUpdated instanceof Date ? db.lastUpdated.toISOString() : String(db.lastUpdated),
+      typeof db.lastUpdated === 'string'
+        ? db.lastUpdated
+        : new Date(db.lastUpdated ?? Date.now()).toISOString(),
   };
 }
 
@@ -200,7 +196,6 @@ function slugify(title: string): string {
     .replace(/-+/g, '-');
 }
 
-// ─── GET — List all books or single book (with Redis caching) ────────────────
 export async function GET(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1';
   try {
@@ -208,12 +203,12 @@ export async function GET(req: NextRequest) {
     if (!allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429 });
     }
-  } catch {
-    // Rate limit check failure non-fatal
-  }
+  } catch {}
 
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get('slug');
+
+  const supabase = await createClient();
 
   if (slug) {
     try {
@@ -222,8 +217,12 @@ export async function GET(req: NextRequest) {
     } catch {}
 
     try {
-      const dbBook = await prisma.book.findUnique({ where: { slug } });
-      if (!dbBook) {
+      const { data: dbBook, error } = await supabase
+        .from('Book')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      if (error || !dbBook) {
         return NextResponse.json({ error: 'Book not found' }, { status: 404 });
       }
       const book = mapDbToBook(dbBook);
@@ -236,7 +235,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Check Redis cache first
   try {
     const cached = await cacheGet<Book[]>(CACHE_KEY_ALL);
     if (cached) {
@@ -247,13 +245,15 @@ export async function GET(req: NextRequest) {
   } catch {}
 
   try {
-    const dbBooks = await prisma.book.findMany({
-      orderBy: { displayOrder: 'asc' },
-    });
+    const { data: dbBooks, error } = await supabase
+      .from('Book')
+      .select('*')
+      .order('displayOrder', { ascending: true });
+    if (error) throw error;
 
-    const books = dbBooks.map(mapDbToBook);
+    const books = (dbBooks || []).map(mapDbToBook);
     try {
-      await cacheSet(CACHE_KEY_ALL, books, 300); // 5 min TTL
+      await cacheSet(CACHE_KEY_ALL, books, 300);
     } catch {}
 
     return NextResponse.json(books, {
@@ -264,7 +264,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─── POST — Create new book ───────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   if (!(await isAdminAuthorized(req))) {
     return NextResponse.json(
@@ -295,7 +294,10 @@ export async function POST(req: NextRequest) {
     const slug = validatedData.slug || slugify(validatedData.title);
     const data = mapBookToDb({ ...validatedData, slug }, slug);
 
-    const created = await prisma.book.create({ data });
+    const supabase = await createClient();
+    const { data: created, error } = await supabase.from('Book').insert(data).select().single();
+    if (error) throw error;
+
     const book = mapDbToBook(created);
 
     try {
@@ -312,7 +314,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── PUT — Update existing book ───────────────────────────────────────────────
 export async function PUT(req: NextRequest) {
   if (!(await isAdminAuthorized(req))) {
     return NextResponse.json(
@@ -347,7 +348,17 @@ export async function PUT(req: NextRequest) {
 
     const validatedData = parsed.data;
     const data = mapBookToDb({ ...validatedData, slug }, slug);
-    const updated = await prisma.book.update({ where: { slug }, data });
+
+    const supabase = await createClient();
+    const { data: updated, error } = await supabase
+      .from('Book')
+      .update(data)
+      .eq('slug', slug)
+      .select()
+      .single();
+
+    if (error) throw error;
+
     const book = mapDbToBook(updated);
 
     try {
@@ -360,7 +371,6 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ─── DELETE — Remove a book ───────────────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
   if (!(await isAdminAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -382,27 +392,10 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
     }
 
-    try {
-      await prisma.book.delete({ where: { slug } });
-    } catch (dbErr: any) {
-      if (
-        dbErr?.message?.includes("Can't reach database server") ||
-        dbErr?.code === 'P1001' ||
-        dbErr?.code === 'P1002'
-      ) {
-        // Database connection paused or unreachable on Supabase
-        return NextResponse.json(
-          {
-            error:
-              'Database server connection paused on Supabase. Please resume your project in Supabase Dashboard or try again in a few seconds.',
-          },
-          { status: 503 }
-        );
-      }
-      throw dbErr;
-    }
+    const supabase = await createClient();
+    const { error } = await supabase.from('Book').delete().eq('slug', slug);
+    if (error) throw error;
 
-    // Invalidate cache
     try {
       await Promise.all([cacheDel(CACHE_KEY_BOOK(slug)), cacheDel(CACHE_KEY_ALL)]);
     } catch {}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { Book } from '@/types/book';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -56,16 +56,22 @@ function mapDbToBook(dbBook: any): Book {
     authorNotes: dbBook.authorNotes || '',
     ageRating: dbBook.ageRating || '',
     contentWarning: dbBook.contentWarning || '',
-    lastUpdated: dbBook.lastUpdated.toISOString(),
+    lastUpdated:
+      typeof dbBook.lastUpdated === 'string'
+        ? dbBook.lastUpdated
+        : new Date(dbBook.lastUpdated ?? Date.now()).toISOString(),
   };
 }
 
-async function loadBooksFromPrisma(): Promise<Book[]> {
+async function loadBooksFromSupabase(): Promise<Book[]> {
   try {
-    const dbBooks = await prisma.book.findMany({
-      orderBy: { displayOrder: 'asc' },
-    });
-    if (dbBooks && dbBooks.length > 0) {
+    const supabase = await createClient();
+    const { data: dbBooks, error } = await supabase
+      .from('Book')
+      .select('*')
+      .order('displayOrder', { ascending: true });
+
+    if (!error && dbBooks && dbBooks.length > 0) {
       return dbBooks.map(mapDbToBook);
     }
     return [];
@@ -75,7 +81,7 @@ async function loadBooksFromPrisma(): Promise<Book[]> {
 }
 
 export default async function BooksPage() {
-  const books = await loadBooksFromPrisma();
+  const books = await loadBooksFromSupabase();
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans">

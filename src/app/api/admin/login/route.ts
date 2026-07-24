@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
@@ -24,11 +24,15 @@ export async function POST(req: Request) {
 
     let user = null;
     try {
-      user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase().trim() },
-      });
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('User')
+        .select('*')
+        .eq('email', email.toLowerCase().trim())
+        .single();
+      user = data;
     } catch {
-      // DB unreachable or connection paused - will fallback to environment authentication below
+      // Fallback below
     }
 
     if (user && user.passwordHash) {

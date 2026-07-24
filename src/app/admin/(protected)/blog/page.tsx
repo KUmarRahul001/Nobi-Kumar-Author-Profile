@@ -3,13 +3,18 @@
  * Admin Blog Posts Management Page
  */
 import * as React from 'react';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import AdminBlogClient from '@/components/admin/AdminBlogClient';
 
 export default async function AdminBlogPage() {
   let posts: any[] = [];
   try {
-    posts = await prisma.post.findMany({ orderBy: { createdAt: 'desc' } });
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('Post')
+      .select('*')
+      .order('createdAt', { ascending: false });
+    if (data) posts = data;
   } catch {}
 
   return (

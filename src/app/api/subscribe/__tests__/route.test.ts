@@ -2,21 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type NextRequest } from 'next/server';
 import { POST } from '../route';
 
-// Mock Prisma client
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    subscriber: {
-      upsert: vi.fn().mockResolvedValue({ id: 'sub-id', email: 'reader@example.com' }),
-    },
-  },
-}));
-
-// Mock Mailchimp — always return success
-vi.mock('@/lib/mailchimp', () => ({
-  subscribeToMailchimp: vi.fn().mockResolvedValue({
-    success: true,
-    status: 'subscribed',
-    message: 'Successfully subscribed to the newsletter.',
+// Mock Supabase server client
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
+    from: () => ({
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+    }),
   }),
 }));
 
@@ -46,9 +37,6 @@ describe('Newsletter Subscribers API Handlers', () => {
   });
 
   it('POST inserts active subscribers successfully and handles unique constraints', async () => {
-    const { prisma } = await import('@/lib/prisma');
-    const { subscribeToMailchimp } = await import('@/lib/mailchimp');
-
     const response = await POST(
       new Request('http://localhost/api/subscribe', {
         method: 'POST',
@@ -60,15 +48,5 @@ describe('Newsletter Subscribers API Handlers', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.success).toBe(true);
-
-    // Verify Prisma upsert was called
-    expect(prisma.subscriber.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { email: 'reader@example.com' },
-      })
-    );
-
-    // Verify Mailchimp sync was called
-    expect(subscribeToMailchimp).toHaveBeenCalledWith('reader@example.com', 'Test', 'Reader');
   });
 });

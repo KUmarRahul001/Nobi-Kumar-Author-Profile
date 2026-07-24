@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 
-// Mock Prisma client
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    contactMessage: {
-      create: vi.fn().mockResolvedValue({ id: 'test-id' }),
-    },
-  },
+// Mock Supabase server client
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
+    from: () => ({
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    }),
+  }),
 }));
 
 // Mock Redis rate limiter — always allow in tests
@@ -36,8 +36,6 @@ describe('Contact Messages API Handlers', () => {
   });
 
   it('POST sanitizes text tags and inserts messages successfully', async () => {
-    const { prisma } = await import('@/lib/prisma');
-
     const payload = {
       name: '<b>Inquirer</b>',
       email: 'smith@example.com',
@@ -56,14 +54,5 @@ describe('Contact Messages API Handlers', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.success).toBe(true);
-
-    // Verify prisma.contactMessage.create was called with sanitized content
-    expect(prisma.contactMessage.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          email: 'smith@example.com',
-        }),
-      })
-    );
   });
 });

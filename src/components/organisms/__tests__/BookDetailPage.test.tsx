@@ -8,41 +8,43 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    book: {
-      findUnique: vi.fn().mockImplementation(async ({ where }: { where: { slug: string } }) => {
-        if (where.slug !== 'valid-slug') {
-          return null;
-        }
-
-        return {
-          slug: 'valid-slug',
-          title: 'Verma Legacy Novel',
-          subtitle: null,
-          genre: 'Thriller',
-          seriesName: 'Verma Saga',
-          volumeNumber: 1,
-          shortDescription: 'Details about the Verma family secrets.',
-          fullSynopsis: 'Details about the Verma family secrets.',
-          releaseDate: '2026',
-          pages: 320,
-          coverUrl: '',
-          samplePdfUrl: null,
-          amazonLink: null,
-          pocketFmLink: null,
-          kukuFmLink: null,
-          audibleLink: null,
-        };
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              slug: 'valid-slug',
+              title: 'Verma Legacy Novel',
+              subtitle: null,
+              genre: 'Thriller',
+              seriesName: 'Verma Saga',
+              volumeNumber: 1,
+              shortDescription: 'Details about the Verma family secrets.',
+              fullSynopsis: 'Details about the Verma family secrets.',
+              releaseDate: '2026',
+              pages: 320,
+              coverUrl: '',
+              samplePdfUrl: null,
+              amazonLink: null,
+              pocketFmLink: null,
+              kukuFmLink: null,
+              audibleLink: null,
+            },
+          }),
+        }),
+        order: vi.fn().mockResolvedValue({
+          data: [
+            {
+              slug: 'valid-slug',
+              title: 'Verma Legacy Novel',
+            },
+          ],
+        }),
       }),
-      findMany: vi.fn().mockResolvedValue([
-        {
-          slug: 'valid-slug',
-          title: 'Verma Legacy Novel',
-        },
-      ]),
-    },
-  },
+    }),
+  }),
 }));
 
 describe('BookDetailPage Routing Component', () => {
