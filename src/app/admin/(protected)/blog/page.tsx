@@ -6,8 +6,6 @@ import * as React from 'react';
 import { prisma } from '@/lib/prisma';
 import AdminBlogClient from '@/components/admin/AdminBlogClient';
 
-export const dynamic = 'force-dynamic';
-
 export default async function AdminBlogPage() {
   let posts: any[] = [];
   try {
