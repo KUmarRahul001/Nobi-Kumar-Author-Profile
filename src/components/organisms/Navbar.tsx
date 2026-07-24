@@ -115,10 +115,10 @@ export default function Navbar({ books, posts }: NavbarProps) {
               href="https://ko-fi.com/nobikumar"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-600/40 hover:border-red-600 text-neutral-300 hover:text-white text-xs font-mono font-medium uppercase tracking-wider rounded-lg transition-all"
               aria-label="Support My Writing on Ko-fi"
             >
-              <span>☕ Support My Writing</span>
+              <span>☕ Support</span>
             </a>
 
             <button
