@@ -14,15 +14,42 @@ cloudinary.config({
 
 export default cloudinary;
 
+export const CLOUDINARY_FOLDERS = {
+  BOOKS: 'nobi-kumar/books',
+  AUTHORS: 'nobi-kumar/authors',
+  BLOG: 'nobi-kumar/blog',
+  GALLERY: 'nobi-kumar/gallery',
+} as const;
+
+/**
+ * Helper to get optimized Cloudinary image URLs with responsive transformations
+ */
+export function getOptimizedImageUrl(
+  url: string,
+  options: { width?: number; height?: number; crop?: string; quality?: string } = {}
+): string {
+  if (!url.includes('cloudinary.com')) return url;
+
+  const { width, height, crop = 'limit', quality = 'auto' } = options;
+  const transformations = [`f_auto`, `q_${quality}`];
+
+  if (width) transformations.push(`w_${width}`);
+  if (height) transformations.push(`h_${height}`);
+  if (crop) transformations.push(`c_${crop}`);
+
+  const transformString = transformations.join(',');
+  return url.replace('/upload/', `/upload/${transformString}/`);
+}
+
 /**
  * Upload a buffer/base64 image to Cloudinary
  * @param fileBuffer - Buffer or base64 data URI
- * @param folder - Cloudinary folder (e.g. 'books/covers')
+ * @param folder - Cloudinary folder (e.g. 'nobi-kumar/books')
  * @param publicId - Optional explicit public_id
  */
 export async function uploadToCloudinary(
   fileBuffer: Buffer | string,
-  folder: string,
+  folder: string = CLOUDINARY_FOLDERS.BOOKS,
   publicId?: string
 ): Promise<{ url: string; publicId: string; width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -45,7 +72,6 @@ export async function uploadToCloudinary(
     });
 
     if (typeof fileBuffer === 'string') {
-      // base64 data URI
       cloudinary.uploader
         .upload(fileBuffer, uploadOptions)
         .then((result) =>

@@ -67,8 +67,9 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
-    const type = (formData.get('type') as string) ?? 'cover'; // 'cover' | 'banner'
-    const slug = (formData.get('slug') as string) ?? 'book';
+    const type = (formData.get('type') as string) ?? 'cover'; // 'cover' | 'banner' | 'author' | 'blog' | 'gallery'
+    const category = (formData.get('category') as string) ?? 'books'; // 'books' | 'authors' | 'blog' | 'gallery'
+    const slug = (formData.get('slug') as string) ?? 'media';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
@@ -107,10 +108,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const folder = `nobi-kumar/books/${type}s`;
+    const targetFolder = (formData.get('folder') as string) ?? `nobi-kumar/${category}/${type}s`;
     const publicId = `${slug}-${type}-${Date.now()}`;
 
-    const result = await uploadToCloudinary(buffer, folder, publicId);
+    const result = await uploadToCloudinary(buffer, targetFolder, publicId);
 
     return NextResponse.json({
       success: true,
