@@ -44,8 +44,8 @@ export default function Navbar({ books, posts }: NavbarProps) {
         {/* Top Contact Notice Bar */}
         <div className="w-full bg-neutral-900 text-neutral-300 text-[11px] font-mono py-1.5 px-4 text-center border-b border-neutral-800">
           <span>Official Media Queries & Publishing Contact: </span>
-          <a href="mailto:kumarrahulraj468@gmail.com" className="text-red-400 hover:underline">
-            kumarrahulraj468@gmail.com
+          <a href="mailto:nobikumar.author@gmail.com" className="text-red-400 hover:underline">
+            nobikumar.author@gmail.com
           </a>
         </div>
 

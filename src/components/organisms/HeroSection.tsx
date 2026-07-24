@@ -12,10 +12,10 @@ export default function HeroSection() {
       <div className="w-full bg-black text-neutral-400 text-[11px] md:text-xs font-mono py-2.5 px-4 text-center border-b border-neutral-800/80 z-20">
         <span>For official media queries or publishing requests Contact ✉ </span>
         <a
-          href="mailto:kumarrahulraj468@gmail.com"
+          href="mailto:nobikumar.author@gmail.com"
           className="text-white hover:text-red-400 font-bold underline"
         >
-          kumarrahulraj468@gmail.com
+          nobikumar.author@gmail.com
         </a>
       </div>
 
