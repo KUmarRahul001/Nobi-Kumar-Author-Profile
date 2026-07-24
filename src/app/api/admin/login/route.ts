@@ -64,8 +64,46 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('API Admin Login Error:', err);
+
+    // Fallback: Check if request matches environment ADMIN_PASSCODE & ADMIN_EMAILS
+    try {
+      const body = await req.clone().json();
+      const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase());
+      const envPasscode = process.env.ADMIN_PASSCODE;
+
+      if (
+        body.email &&
+        adminEmails.includes(body.email.toLowerCase().trim()) &&
+        envPasscode &&
+        body.password === envPasscode
+      ) {
+        const response = NextResponse.json({
+          success: true,
+          user: {
+            id: 'env-admin',
+            email: body.email,
+            name: 'System Admin',
+            role: 'admin',
+          },
+        });
+
+        response.cookies.set('admin_session', body.email, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        });
+
+        return response;
+      }
+    } catch {}
+
+    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
   }
 }
 
