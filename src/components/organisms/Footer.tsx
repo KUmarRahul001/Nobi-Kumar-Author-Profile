@@ -52,6 +52,9 @@ export default function Footer() {
               <Link href="/editorial-policy" className="hover:text-crimson">
                 Editorial
               </Link>
+              <Link href="/press" className="hover:text-crimson">
+                Press Kit
+              </Link>
             </div>
           </div>
 
