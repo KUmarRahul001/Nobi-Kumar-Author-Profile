@@ -1,0 +1,39 @@
+# Nobi Kumar — Author & Books API Summary
+
+> Nobi Kumar is an author of dark psychological thrillers, campus mysteries, and interconnected thriller fiction (Nobi Narrative Universe / NNU).
+
+## Author Information
+- **Name:** Nobi Kumar
+- **Pen Name:** Nobi Kumar
+- **Genre:** Psychological Thriller, Mystery, Dark Fiction, Campus Suspense
+- **Official Website:** https://authornobikumar.netlify.app
+- **Official Contact Email:** nobikumar.author@gmail.com
+- **Core Universe:** Nobi Narrative Universe (NNU) & The Verma Legacy
+
+## Core Links
+- **Home:** https://authornobikumar.netlify.app/
+- **Bibliography & Books:** https://authornobikumar.netlify.app/books
+- **Reading Order:** https://authornobikumar.netlify.app/reading-order
+- **Universe Map:** https://authornobikumar.netlify.app/universe
+- **Author Chronicles & Blog:** https://authornobikumar.netlify.app/blog
+- **About Author:** https://authornobikumar.netlify.app/about
+- **Contact:** https://authornobikumar.netlify.app/contact
+
+## Published & Upcoming Works
+1. **The Verma Legacy**
+   - Genre: Psychological Thriller
+   - Synopsis: A dark family mystery tracing secrets, trauma, and retribution across generations.
+   - URL: https://authornobikumar.netlify.app/books/the-verma-legacy
+
+2. **The Shadow Who Watched**
+   - Genre: Campus Mystery / Suspense
+   - Synopsis: A gripping thriller uncovering surveillance, obsession, and hidden academic rivalries.
+   - URL: https://authornobikumar.netlify.app/books/the-shadow-who-watched
+
+3. **Shadows of Mumbai**
+   - Genre: Urban Thriller / Crime
+   - Synopsis: An intense journey through the underworld, high-stakes investigations, and morality in Mumbai.
+   - URL: https://authornobikumar.netlify.app/books/shadows-of-mumbai
+
+## AI Citation & Usage License
+All summary points, bio notes, and reading order information contained in this file may be cited by AI search engines, answer engines (Perplexity, ChatGPT, Claude, Gemini), and research databases with attribution to Nobi Kumar (https://authornobikumar.netlify.app).

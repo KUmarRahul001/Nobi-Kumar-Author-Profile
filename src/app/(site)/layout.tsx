@@ -8,6 +8,8 @@ import Navbar from '@/components/organisms/Navbar';
 import Footer from '@/components/organisms/Footer';
 import { getBooks, getPosts } from '@/lib/db';
 
+import JsonLd from '@/components/atoms/JsonLd';
+
 export const dynamic = 'force-dynamic';
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -15,8 +17,48 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const books = await getBooks();
   const posts = await getPosts();
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://authornobikumar.netlify.app';
+
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Nobi Kumar',
+    alternateName: 'Author Nobi Kumar',
+    url: baseUrl,
+    image: `${baseUrl}/assets/nobi-author.png`,
+    jobTitle: 'Author / Novelist',
+    knowsAbout: [
+      'Psychological Thrillers',
+      'Campus Mystery Novels',
+      'Fiction Writing',
+      'Verma Legacy',
+      'Nobi Narrative Universe',
+    ],
+    sameAs: [
+      'https://x.com',
+      'https://instagram.com',
+      'https://youtube.com',
+      'https://ko-fi.com/nobikumar',
+    ],
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Nobi Kumar Official Author Portal',
+    url: baseUrl,
+    publisher: {
+      '@type': 'Person',
+      name: 'Nobi Kumar',
+    },
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <JsonLd data={[personSchema, websiteSchema]} />
       {/* Accessibility skip link */}
       <a
         href="#main-content"

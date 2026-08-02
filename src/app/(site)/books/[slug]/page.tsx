@@ -68,6 +68,9 @@ export async function generateMetadata({ params }: BookPageProps): Promise<Metad
   };
 }
 
+import Breadcrumbs from '@/components/atoms/Breadcrumbs';
+import JsonLd from '@/components/atoms/JsonLd';
+
 export default async function BookDetailPage({ params }: BookPageProps) {
   const { slug } = await params;
   const currentBook = await getBookBySlugFromSupabase(slug);
@@ -77,9 +80,54 @@ export default async function BookDetailPage({ params }: BookPageProps) {
     notFound();
   }
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://authornobikumar.netlify.app';
+
+  const bookSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name: currentBook.title,
+    alternateName: currentBook.subtitle || undefined,
+    author: {
+      '@type': 'Person',
+      name: 'Nobi Kumar',
+      url: baseUrl,
+    },
+    isbn: currentBook.isbn || undefined,
+    genre: currentBook.genre,
+    inLanguage: currentBook.language || 'English',
+    numberOfPages: currentBook.pages || undefined,
+    image: currentBook.coverUrl || `${baseUrl}/assets/nobi-author.png`,
+    description: currentBook.fullSynopsis || currentBook.shortDescription,
+    url: `${baseUrl}/books/${currentBook.slug}`,
+    workExample: currentBook.amazonLink
+      ? [
+          {
+            '@type': 'Book',
+            bookFormat: 'https://schema.org/Paperback',
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'USD',
+              availability: 'https://schema.org/InStock',
+              url: currentBook.amazonLink,
+            },
+          },
+        ]
+      : undefined,
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans py-10 md:py-16">
-      <div className="max-w-6xl mx-auto px-4">
+      <JsonLd data={bookSchema} />
+      <div className="max-w-6xl mx-auto px-4 space-y-6">
+        <Breadcrumbs
+          items={[
+            { name: 'Books', item: '/books' },
+            { name: currentBook.title, item: `/books/${currentBook.slug}` },
+          ]}
+        />
         {/* Main 2-Column Layout: Left Books Navigation Sidebar + Right Detailed Book View */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Persistent Vertical Books Navigation List */}

@@ -28,14 +28,29 @@ export default function Footer() {
               <Link href="/books" className="hover:text-crimson">
                 Novels
               </Link>
+              <Link href="/reading-order" className="hover:text-crimson">
+                Reading Order
+              </Link>
               <Link href="/universe" className="hover:text-crimson">
                 Universe Map
               </Link>
               <Link href="/blog" className="hover:text-crimson">
                 Chronicles
               </Link>
+              <Link href="/about" className="hover:text-crimson">
+                About
+              </Link>
               <Link href="/contact" className="hover:text-crimson">
                 Contact
+              </Link>
+              <Link href="/privacy" className="hover:text-crimson">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-crimson">
+                Terms
+              </Link>
+              <Link href="/editorial-policy" className="hover:text-crimson">
+                Editorial
               </Link>
             </div>
           </div>

@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import NewsletterSignup from '@/components/organisms/NewsletterSignup';
 
+import Breadcrumbs from '@/components/atoms/Breadcrumbs';
+import AdsterraBanner from '@/components/atoms/AdsterraBanner';
+
 export const metadata: Metadata = {
   title: 'About Nobi Kumar | Author & Storyteller',
   description:
@@ -13,6 +16,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans py-12 md:py-20">
       <div className="max-w-4xl mx-auto px-4 space-y-12">
+        <Breadcrumbs items={[{ name: 'About Author', item: '/about' }]} />
         {/* Header Title */}
         <div className="text-center space-y-4">
           <span className="text-xs font-mono text-crimson uppercase tracking-widest font-bold">
@@ -85,6 +89,9 @@ export default function AboutPage() {
             </a>
           </div>
         </section>
+
+        {/* Adsterra Native Banner Slot (Allowed on About Page) */}
+        <AdsterraBanner adKey="about-native-banner" format="native" />
 
         {/* Beehiiv Newsletter Section */}
         <NewsletterSignup

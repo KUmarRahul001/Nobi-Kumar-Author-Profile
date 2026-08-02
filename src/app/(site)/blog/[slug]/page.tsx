@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { getPostBySlug } from '@/lib/db';
 import BlogCommentSection from '@/components/organisms/BlogCommentSection';
 import Breadcrumbs from '@/components/molecules/Breadcrumbs';
+import AdsterraBanner from '@/components/atoms/AdsterraBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,6 +105,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="prose prose-invert max-w-none text-muted leading-relaxed font-sans text-sm sm:text-base whitespace-pre-wrap">
             {post.body}
           </div>
+
+          {/* Adsterra Non-Intrusive Banner (Allowed Post Content) */}
+          <AdsterraBanner adKey="blog-post-banner" format="banner" />
 
           {/* Comments Section Component (FR-07) */}
           <Suspense
