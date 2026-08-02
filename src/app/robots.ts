@@ -3,7 +3,10 @@ import { MetadataRoute } from 'next';
 export const revalidate = 0;
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://authornobikumar.netlify.app';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://nextorra.netlify.app';
 
   return {
     rules: [
