@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : 'https://nextorra.netlify.app';
+      : 'https://authornobikumar.netlify.app';
 
   return {
     rules: [
