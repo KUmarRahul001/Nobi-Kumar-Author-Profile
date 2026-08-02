@@ -22,16 +22,26 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     };
   }
 
+  const coverImage = post.coverUrl || '/assets/nobi-author.png';
+  const description = post.excerpt ? post.excerpt.slice(0, 155) + '...' : '';
+
   return {
     title: `${post.title} | Nobi Kumar Chronicles`,
-    description: post.excerpt.slice(0, 155) + '...',
+    description,
     openGraph: {
       title: post.title,
-      description: post.excerpt.slice(0, 155),
+      description,
       type: 'article',
       publishedTime: post.publishedAt || undefined,
       authors: ['Nobi Kumar'],
       tags: post.tags,
+      images: [{ url: coverImage, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [coverImage],
     },
   };
 }

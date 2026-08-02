@@ -29,17 +29,46 @@ const baseUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: 'Nobi Kumar | Official Author Website',
-  description: 'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar.',
+  title: {
+    default: 'Nobi Kumar | Official Author Website',
+    template: '%s | Nobi Kumar',
+  },
+  description:
+    'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar. Read excerpts, access classified author archives, and track the Verma Legacy.',
   keywords: [
     'Nobi Kumar',
     'Author Website',
     'Psychological Thriller',
     'Mystery Novels',
     'Verma Legacy',
+    'Indian Thriller Novels',
+    'Dark Fiction',
   ],
   alternates: {
     canonical: './',
+  },
+  openGraph: {
+    title: 'Nobi Kumar | Official Author Website',
+    description:
+      'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar. Read excerpts, access classified author archives, and track the Verma Legacy.',
+    url: baseUrl,
+    siteName: 'Nobi Kumar Author Portal',
+    images: [
+      {
+        url: '/assets/nobi-author.png',
+        width: 1200,
+        height: 630,
+        alt: 'Nobi Kumar Official Author Profile',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nobi Kumar | Official Author Website',
+    description: 'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar.',
+    images: ['/assets/nobi-author.png'],
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',

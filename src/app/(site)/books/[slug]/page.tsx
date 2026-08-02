@@ -38,12 +38,33 @@ export async function generateMetadata({ params }: BookPageProps): Promise<Metad
   const book = await getBookBySlugFromSupabase(slug);
 
   if (!book) {
-    return { title: 'Book Not Found | Nobi Kumar' };
+    return { title: 'Book Not Found' };
   }
 
+  const title = `${book.title} | Nobi Kumar Thrillers`;
+  const description = (book.fullSynopsis || book.shortDescription || '').slice(0, 155);
+  const coverImage = book.coverUrl || '/assets/nobi-author.png';
+
   return {
-    title: `${book.title} | Nobi Kumar Thrillers`,
-    description: (book.fullSynopsis || book.shortDescription).slice(0, 155),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'book',
+      images: [
+        {
+          url: coverImage,
+          alt: `${book.title} Book Cover`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [coverImage],
+    },
   };
 }
 
