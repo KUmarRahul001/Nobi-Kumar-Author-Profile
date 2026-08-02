@@ -22,7 +22,13 @@ const playfair = Playfair_Display({
 
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+    ? process.env.NEXT_PUBLIC_SITE_URL
+    : 'https://authornobikumar.netlify.app';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: 'Nobi Kumar | Official Author Website',
   description: 'Explore the psychological thriller, mystery, and horror novels of Nobi Kumar.',
   keywords: [
@@ -32,6 +38,9 @@ export const metadata: Metadata = {
     'Mystery Novels',
     'Verma Legacy',
   ],
+  alternates: {
+    canonical: './',
+  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
