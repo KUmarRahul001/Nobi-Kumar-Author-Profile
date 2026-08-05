@@ -97,6 +97,12 @@ export default function Navbar({ books, posts }: NavbarProps) {
               About
             </Link>
             <Link
+              href="/newsletter"
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 transition-colors"
+            >
+              Newsletter
+            </Link>
+            <Link
               href="/contact"
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 transition-colors"
             >
@@ -180,6 +186,13 @@ export default function Navbar({ books, posts }: NavbarProps) {
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 py-1 w-full"
             >
               About
+            </Link>
+            <Link
+              href="/newsletter"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 py-1 w-full"
+            >
+              Newsletter
             </Link>
             <Link
               href="/contact"

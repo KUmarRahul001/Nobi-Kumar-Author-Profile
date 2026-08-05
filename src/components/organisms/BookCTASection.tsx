@@ -35,16 +35,17 @@ export default function BookCTASection({
               Join the Newsletter
             </h4>
             <p className="text-xs text-muted leading-relaxed font-sans">
-              Get exclusive updates, free chapters, behind-the-scenes content, and early access to
-              upcoming books.
+              Every month I share exclusive chapters, writing updates, behind-the-scenes notes, and
+              previews of upcoming novels.
             </p>
           </div>
           <div className="pt-2">
             <Link
               href="/newsletter"
-              className="inline-block px-4 py-2 rounded-lg text-xs font-mono uppercase font-bold bg-crimson text-white hover:bg-crimson/90 transition-all shadow"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono uppercase font-bold bg-crimson text-white hover:bg-crimson/90 transition-all shadow"
             >
-              Join Newsletter
+              <span>Join</span>
+              <span>→</span>
             </Link>
           </div>
         </div>
