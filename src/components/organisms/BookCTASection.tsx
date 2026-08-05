@@ -41,10 +41,10 @@ export default function BookCTASection({
           </div>
           <div className="pt-2">
             <Link
-              href="#newsletter"
+              href="/newsletter"
               className="inline-block px-4 py-2 rounded-lg text-xs font-mono uppercase font-bold bg-crimson text-white hover:bg-crimson/90 transition-all shadow"
             >
-              Subscribe Free
+              Join Newsletter
             </Link>
           </div>
         </div>

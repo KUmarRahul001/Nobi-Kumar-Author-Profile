@@ -28,6 +28,9 @@ export default function Footer() {
               <Link href="/books" className="hover:text-crimson">
                 Novels
               </Link>
+              <Link href="/newsletter" className="hover:text-crimson">
+                Newsletter
+              </Link>
               <Link href="/reading-order" className="hover:text-crimson">
                 Reading Order
               </Link>
