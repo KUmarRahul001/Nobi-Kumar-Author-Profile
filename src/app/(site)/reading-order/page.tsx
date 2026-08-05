@@ -3,40 +3,66 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/atoms/Breadcrumbs';
 import JsonLd from '@/components/atoms/JsonLd';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
-  title: 'Official Nobi Kumar Reading Order & Bibliography (2026)',
+  title: 'Official Nobi Kumar Reading Order & Bibliography',
   description:
-    'The complete chronological and publication reading order for Nobi Kumar thrillers, including the Verma Legacy and Nobi Narrative Universe (NNU).',
+    'The complete chronological and publication reading order for Nobi Kumar thrillers, fetched live from the official catalog.',
 };
 
-export default function ReadingOrderPage() {
-  const books = [
-    {
-      order: 1,
-      title: 'The Verma Legacy',
-      genre: 'Psychological Thriller / Family Mystery',
-      slug: 'the-verma-legacy',
-      description:
-        'The foundational novel of the NNU universe. Traces three generations of estate secrets, trauma, and psychological warfare.',
-    },
-    {
-      order: 2,
-      title: 'The Shadow Who Watched',
-      genre: 'Dark Campus Mystery / Suspense',
-      slug: 'the-shadow-who-watched',
-      description:
-        'A chilling campus thriller exploring surveillance, obsession, and academic rivalries.',
-    },
-    {
-      order: 3,
-      title: 'Shadows of Mumbai',
-      genre: 'Noir / Crime Thriller',
-      slug: 'shadows-of-mumbai',
-      description:
-        'An intense investigation through Mumbai’s rainy streets and shadowy underworld.',
-    },
-  ];
+async function getBooksFromSupabase() {
+  try {
+    const supabase = await createClient();
+    const { data: books } = await supabase
+      .from('Book')
+      .select('*')
+      .order('displayOrder', { ascending: true });
+    if (books && books.length > 0) return books;
+  } catch (err) {
+    console.error('Failed to fetch books from Supabase for reading order:', err);
+  }
+  return [];
+}
+
+export default async function ReadingOrderPage() {
+  const booksFromDb = await getBooksFromSupabase();
+
+  const books =
+    booksFromDb.length > 0
+      ? booksFromDb.map((b, idx) => ({
+          order: idx + 1,
+          title: b.title,
+          genre: b.genre || 'Psychological Thriller',
+          slug: b.slug,
+          description: b.shortDescription || b.fullSynopsis || '',
+        }))
+      : [
+          {
+            order: 1,
+            title: 'The Verma Legacy',
+            genre: 'Psychological Thriller / Family Mystery',
+            slug: 'the-verma-legacy',
+            description:
+              'The foundational novel of the NNU universe. Traces three generations of estate secrets, trauma, and psychological warfare.',
+          },
+          {
+            order: 2,
+            title: 'The Shadow Who Watched',
+            genre: 'Dark Campus Mystery / Suspense',
+            slug: 'the-shadow-who-watched',
+            description:
+              'A chilling campus thriller exploring surveillance, obsession, and academic rivalries.',
+          },
+          {
+            order: 3,
+            title: 'Shadows of Mumbai',
+            genre: 'Noir / Crime Thriller',
+            slug: 'shadows-of-mumbai',
+            description:
+              'An intense investigation through Mumbai’s rainy streets and shadowy underworld.',
+          },
+        ];
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -47,7 +73,9 @@ export default function ReadingOrderPage() {
         name: 'What is the recommended reading order for Nobi Kumar books?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The recommended reading order for Nobi Kumar thrillers is: 1. The Verma Legacy, 2. The Shadow Who Watched, 3. Shadows of Mumbai.',
+          text: `The recommended reading order for Nobi Kumar thrillers is: ${books
+            .map((b) => `${b.order}. ${b.title}`)
+            .join(', ')}.`,
         },
       },
       {
@@ -124,7 +152,8 @@ export default function ReadingOrderPage() {
                 Where should I start reading Nobi Kumar’s books?
               </h3>
               <p className="text-xs text-muted leading-relaxed">
-                We strongly recommend starting with <strong>The Verma Legacy</strong> as it lays the
+                We strongly recommend starting with{' '}
+                <strong>{books[0]?.title || 'The Verma Legacy'}</strong> as it lays the
                 psychological foundation for the Verma family arc and the broader NNU universe.
               </p>
             </div>
