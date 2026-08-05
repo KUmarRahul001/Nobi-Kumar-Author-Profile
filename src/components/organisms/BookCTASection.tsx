@@ -57,8 +57,7 @@ export default function BookCTASection({
               Leave a Review
             </h4>
             <p className="text-xs text-muted leading-relaxed font-sans">
-              Your review helps other readers discover my stories
-              {bookTitle ? ` and support ${bookTitle}` : ''}.
+              Your reviews help other readers find the book.
             </p>
           </div>
           <div className="pt-2">
@@ -80,7 +79,7 @@ export default function BookCTASection({
               Share with a Friend
             </h4>
             <p className="text-xs text-muted leading-relaxed font-sans">
-              If you enjoyed the book, recommend it to someone who loves psychological thrillers.
+              If you loved it, tell someone.
             </p>
           </div>
           <div className="pt-2">
