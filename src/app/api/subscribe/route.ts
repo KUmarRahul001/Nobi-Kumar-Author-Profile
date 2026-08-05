@@ -1,11 +1,7 @@
-/**
- * src/app/api/subscribe/route.ts
- * Newsletter subscription — saves to Prisma DB + syncs to Beehiiv & Mailchimp
- * Rate limited via Upstash Redis
- */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscribeRatelimit } from '@/lib/redis';
+import { subscribeToMailchimp } from '@/lib/mailchimp';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
@@ -34,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? 'Invalid email address' },
+        { error: parsed.error.issues[0]?.message ?? 'Please enter a valid email address.' },
         { status: 400 }
       );
     }
@@ -46,8 +42,6 @@ export async function POST(req: NextRequest) {
     // 1. Save/update in Supabase DB
     try {
       const supabase = await createClient();
-      console.log('[Subscribe API] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-
       const payload = {
         id: crypto.randomUUID(),
         email,
@@ -55,38 +49,26 @@ export async function POST(req: NextRequest) {
         status: 'active',
       };
 
-      console.log('[Subscribe API] Inserting into "Subscriber":', payload);
-
-      const { data, error, status } = await supabase
+      const { data, error } = await supabase
         .from('Subscriber')
         .upsert(payload, { onConflict: 'email' })
         .select();
 
-      console.log('[Subscribe API] Supabase Response:', { data, error, status });
-
       if (error) {
-        console.error('[Supabase Upsert Error Details]:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-        });
+        console.error('[Subscribe API] Supabase error:', error.message);
+      } else {
+        console.log('[Subscribe API] Supabase upsert success');
       }
     } catch (sbErr) {
       console.error('[Subscribe API] Exception during Supabase upsert:', sbErr);
     }
 
-    // 2. Sync to Beehiiv API V2 if BEEHIIV_API_KEY is configured server-side
+    // 2. Sync to Beehiiv API V2 (Primary Production Newsletter Provider)
     const beehiivApiKey = process.env.BEEHIIV_API_KEY;
     const publicationId =
       process.env.BEEHIIV_PUBLICATION_ID ||
       process.env.NEXT_PUBLIC_BEEHIIV_PUBLICATION_ID ||
       'pub_f065d229-fd93-42da-8257-d761649484cd';
-
-    console.log('[Subscribe API] Beehiiv config check:', {
-      hasKey: Boolean(beehiivApiKey),
-      publicationId,
-    });
 
     if (beehiivApiKey) {
       try {
@@ -107,17 +89,35 @@ export async function POST(req: NextRequest) {
           }
         );
         const bhData = await bhRes.json().catch(() => ({}));
-        console.log('[Subscribe API] Beehiiv Response:', { status: bhRes.status, data: bhData });
+        console.log('[Subscribe API] Beehiiv V2 Sync Response:', {
+          status: bhRes.status,
+          data: bhData,
+        });
       } catch (bhErr) {
-        console.error('Beehiiv API sync error:', bhErr);
+        console.error('[Subscribe API] Beehiiv API sync error:', bhErr);
+      }
+    } else {
+      console.warn('[Subscribe API] BEEHIIV_API_KEY is not configured. Skipping Beehiiv sync.');
+    }
+
+    // 3. Optional Mailchimp Sync (Fallback)
+    const mailchimpKey = process.env.MAILCHIMP_API_KEY;
+    const audienceId = process.env.MAILCHIMP_AUDIENCE_ID;
+    if (mailchimpKey && audienceId && audienceId !== 'your-audience-list-id') {
+      try {
+        await subscribeToMailchimp(email, name);
+        console.log('[Subscribe API] Mailchimp sync success');
+      } catch (mcErr) {
+        console.error('[Subscribe API] Mailchimp optional sync error:', mcErr);
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Thank you! You have successfully subscribed to The Nobi Kumar Newsletter.',
+      message:
+        "Thanks for subscribing!\nYou'll receive exclusive updates, free chapters, behind-the-scenes content, and early access to upcoming books.",
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[Subscribe API] Global Handler Error:', err);
     return NextResponse.json({ error: 'Subscription failed. Please try again.' }, { status: 500 });
   }

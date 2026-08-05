@@ -48,7 +48,9 @@ export default function NewsletterSignup({
 
       setMessage({
         type: 'success',
-        text: 'Thank you! You are now subscribed to The Nobi Kumar Newsletter.',
+        text:
+          data.message ||
+          "Thanks for subscribing!\nYou'll receive exclusive updates, free chapters, behind-the-scenes content, and early access to upcoming books.",
       });
       setEmail('');
 

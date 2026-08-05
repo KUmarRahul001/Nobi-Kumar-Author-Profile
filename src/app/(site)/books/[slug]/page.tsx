@@ -7,6 +7,7 @@ import Book3DCover from '@/components/atoms/Book3DCover';
 
 import { getAmazonAffiliateLink, AMAZON_AFFILIATE_DISCLAIMER } from '@/lib/affiliate';
 import NewsletterSignup from '@/components/organisms/NewsletterSignup';
+import BookCTASection from '@/components/organisms/BookCTASection';
 
 interface BookPageProps {
   params: Promise<{ slug: string }>;
@@ -331,8 +332,13 @@ export default async function BookDetailPage({ params }: BookPageProps) {
           </div>
         </div>
 
-        {/* Beehiiv Newsletter Signup Card */}
+        {/* Reader Action CTA */}
         <div className="mt-12">
+          <BookCTASection bookTitle={currentBook.title} amazonReviewUrl={currentBook.amazonLink} />
+        </div>
+
+        {/* Beehiiv Newsletter Signup Card */}
+        <div className="mt-8">
           <NewsletterSignup
             title={`Enjoyed reading about ${currentBook.title}?`}
             subtitle="Subscribe to get notified first when the next book in the series releases, plus access to secret author case files."
