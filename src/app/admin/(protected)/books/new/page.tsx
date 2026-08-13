@@ -97,19 +97,21 @@ export default function NewBookPage() {
     setError('');
 
     try {
-      const payload = {
-        ...formData,
-        volumeNumber: formData.volumeNumber ? parseInt(formData.volumeNumber) : null,
-        pages: formData.pages ? parseInt(formData.pages) : null,
-        displayOrder: parseInt(String(formData.displayOrder)),
-      };
+      const cleanPayload = Object.fromEntries(
+        Object.entries({
+          ...formData,
+          volumeNumber: formData.volumeNumber ? parseInt(formData.volumeNumber) : null,
+          pages: formData.pages ? parseInt(formData.pages) : null,
+          displayOrder: parseInt(String(formData.displayOrder)),
+        }).map(([key, val]) => [key, typeof val === 'string' && val.trim() === '' ? null : val])
+      );
 
       const res = await fetch('/api/manage-books', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanPayload),
       });
 
       const text = await res.text();

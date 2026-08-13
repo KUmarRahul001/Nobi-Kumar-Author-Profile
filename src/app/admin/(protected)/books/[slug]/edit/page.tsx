@@ -140,20 +140,22 @@ export default function EditBookPage() {
     setError('');
 
     try {
-      const payload = {
-        ...formData,
-        originalSlug: slugParam,
-        volumeNumber: formData.volumeNumber ? parseInt(formData.volumeNumber) : null,
-        pages: formData.pages ? parseInt(formData.pages) : null,
-        displayOrder: parseInt(String(formData.displayOrder)),
-      };
+      const cleanPayload = Object.fromEntries(
+        Object.entries({
+          ...formData,
+          originalSlug: slugParam,
+          volumeNumber: formData.volumeNumber ? parseInt(formData.volumeNumber) : null,
+          pages: formData.pages ? parseInt(formData.pages) : null,
+          displayOrder: parseInt(String(formData.displayOrder)),
+        }).map(([key, val]) => [key, typeof val === 'string' && val.trim() === '' ? null : val])
+      );
 
       const res = await fetch('/api/manage-books', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanPayload),
       });
 
       const text = await res.text();
