@@ -157,7 +157,7 @@ export default function NewsletterPage() {
           />
           {/* Social Proof */}
           <p className="text-center text-xs font-mono text-muted">
-            👥 Join thousands of thriller readers following Nobi Kumar.
+            👥 Join fellow readers and never miss a new release.
           </p>
         </div>
 
