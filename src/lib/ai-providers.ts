@@ -149,7 +149,18 @@ export class OpenRouterProvider implements AIProvider {
       const rawContent = data.choices?.[0]?.message?.content;
       if (!rawContent) return null;
 
-      const parsed = JSON.parse(rawContent);
+      let parsed: any;
+      try {
+        parsed = JSON.parse(rawContent);
+      } catch {
+        const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          return null;
+        }
+      }
+
       return {
         title: parsed.title,
         excerpt: parsed.excerpt,
