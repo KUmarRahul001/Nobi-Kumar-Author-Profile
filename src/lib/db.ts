@@ -120,6 +120,39 @@ export async function getBookBySlug(slug: string): Promise<Book | null> {
 }
 
 export async function getPosts(): Promise<Post[]> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('Post')
+      .select('*')
+      .eq('status', 'published')
+      .order('publishedAt', { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      return data.map((item: any) => ({
+        slug: item.slug,
+        title: item.title,
+        excerpt: item.excerpt || '',
+        body: item.content || '',
+        category: item.category || 'General',
+        tags: Array.isArray(item.tags)
+          ? item.tags
+          : typeof item.tags === 'string'
+            ? item.tags
+                .split(',')
+                .map((t: string) => t.trim())
+                .filter(Boolean)
+            : [],
+        publishedAt: item.publishedAt || item.createdAt || null,
+        coverUrl: item.coverUrl,
+        content: item.content || '',
+      }));
+    }
+  } catch (err) {
+    console.warn('[db.ts] Supabase getPosts query failed, falling back to local MDX:', err);
+  }
+
   ensureDirExists(POSTS_DIR);
   const files = fs.readdirSync(POSTS_DIR).filter((file) => file.endsWith('.mdx'));
 
@@ -142,10 +175,42 @@ export async function getPosts(): Promise<Post[]> {
         content,
       };
     })
-    .filter((post) => post.publishedAt !== null); // Filter out drafts in production listing
+    .filter((post) => post.publishedAt !== null);
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: item, error } = await supabase.from('Post').select('*').eq('slug', slug).single();
+
+    if (!error && item) {
+      return {
+        slug: item.slug,
+        title: item.title,
+        excerpt: item.excerpt || '',
+        body: item.content || '',
+        category: item.category || 'General',
+        tags: Array.isArray(item.tags)
+          ? item.tags
+          : typeof item.tags === 'string'
+            ? item.tags
+                .split(',')
+                .map((t: string) => t.trim())
+                .filter(Boolean)
+            : [],
+        publishedAt: item.publishedAt || item.createdAt || null,
+        coverUrl: item.coverUrl,
+        content: item.content || '',
+      };
+    }
+  } catch (err) {
+    console.warn(
+      `[db.ts] Supabase getPostBySlug query failed for ${slug}, falling back to local MDX:`,
+      err
+    );
+  }
+
   ensureDirExists(POSTS_DIR);
   const filePath = path.join(POSTS_DIR, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
