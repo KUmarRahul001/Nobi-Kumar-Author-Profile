@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import NewsletterSignup from './NewsletterSignup';
+import { AUTHOR_ENTITY } from '@/constants/author';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -15,7 +16,7 @@ export default function Footer() {
         <div className="space-y-4">
           <NewsletterSignup
             variant="inline"
-            title="The Nobi Kumar Newsletter"
+            title={`The ${AUTHOR_ENTITY.name} Newsletter`}
             subtitle="Subscribe to receive classified case file alerts, early chapter previews, and thriller insights."
           />
         </div>
@@ -25,14 +26,14 @@ export default function Footer() {
           <div className="space-y-2">
             <h4 className="text-xs font-mono uppercase tracking-widest text-muted">Navigation</h4>
             <div className="flex flex-wrap gap-4 text-xs font-mono text-muted justify-start md:justify-end">
+              <Link href="/reading-order" className="hover:text-crimson text-crimson font-bold">
+                Start Reading
+              </Link>
               <Link href="/books" className="hover:text-crimson">
                 Novels
               </Link>
               <Link href="/newsletter" className="hover:text-crimson">
                 Newsletter
-              </Link>
-              <Link href="/reading-order" className="hover:text-crimson">
-                Reading Order
               </Link>
               <Link href="/universe" className="hover:text-crimson">
                 Universe Map
@@ -64,22 +65,22 @@ export default function Footer() {
           {/* Social Channels Link Row (FR-10) */}
           <div className="flex items-center gap-4 justify-start md:justify-end text-muted">
             <a
-              href="https://x.com"
+              href={AUTHOR_ENTITY.sameAs.x}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-crimson transition-colors"
-              aria-label="Follow Nobi Kumar on X"
+              aria-label={`Follow ${AUTHOR_ENTITY.name} on X`}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
             <a
-              href="https://instagram.com"
+              href={AUTHOR_ENTITY.sameAs.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-crimson transition-colors"
-              aria-label="Follow Nobi Kumar on Instagram"
+              aria-label={`Follow ${AUTHOR_ENTITY.name} on Instagram`}
             >
               <svg
                 className="w-4 h-4"
@@ -97,11 +98,11 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="https://youtube.com"
+              href={AUTHOR_ENTITY.sameAs.youtube}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-crimson transition-colors"
-              aria-label="Subscribe to Nobi Kumar on YouTube"
+              aria-label={`Subscribe to ${AUTHOR_ENTITY.name} on YouTube`}
             >
               <svg
                 className="w-4 h-4"
@@ -126,11 +127,11 @@ export default function Footer() {
             </p>
             <div>
               <a
-                href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/nobikumar'}
+                href={AUTHOR_ENTITY.sameAs.kofi}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm"
-                aria-label="Support Nobi Kumar on Ko-fi"
+                aria-label={`Support ${AUTHOR_ENTITY.name} on Ko-fi`}
               >
                 <span>☕ Support on Ko-fi</span>
               </a>
@@ -138,10 +139,12 @@ export default function Footer() {
           </div>
 
           <div className="text-[10px] font-mono text-muted space-y-1">
-            <p>© {currentYear} Nobi Kumar. All rights reserved.</p>
-            <p>Designed for psychological thriller and mystery readers.</p>
+            <p>
+              © {currentYear} {AUTHOR_ENTITY.name}. All rights reserved.
+            </p>
+            <p>{AUTHOR_ENTITY.tagline}</p>
             <p className="text-[9px] opacity-70 pt-1">
-              As an Amazon Associate, Nobi Kumar earns from qualifying purchases.
+              As an Amazon Associate, {AUTHOR_ENTITY.name} earns from qualifying purchases.
             </p>
           </div>
         </div>

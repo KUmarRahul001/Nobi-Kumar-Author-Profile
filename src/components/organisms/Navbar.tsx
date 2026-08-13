@@ -73,6 +73,12 @@ export default function Navbar({ books, posts }: NavbarProps) {
               Home
             </Link>
             <Link
+              href="/reading-order"
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-crimson hover:text-red-500 transition-colors"
+            >
+              Start Reading
+            </Link>
+            <Link
               href="/books"
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 transition-colors"
             >
@@ -158,6 +164,13 @@ export default function Navbar({ books, posts }: NavbarProps) {
               className="text-xs font-mono uppercase tracking-wider font-semibold text-neutral-700 dark:text-neutral-300 hover:text-red-600 py-1 w-full"
             >
               Home
+            </Link>
+            <Link
+              href="/reading-order"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-xs font-mono uppercase tracking-wider font-semibold text-crimson hover:text-red-500 py-1 w-full"
+            >
+              Start Reading
             </Link>
             <Link
               href="/books"

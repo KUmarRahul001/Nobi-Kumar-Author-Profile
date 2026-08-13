@@ -320,20 +320,49 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                 </div>
               </div>
             </div>
-
-            {/* Subtle Watermark Portrait Background in exact Chetan Bhagat style */}
-            <div className="absolute right-0 top-12 w-96 h-96 pointer-events-none opacity-5 dark:opacity-10 filter grayscale">
-              <img
-                src="/assets/nobi-author.png"
-                alt="Nobi Kumar Background Watermark"
-                className="w-full h-full object-contain"
-              />
-            </div>
           </div>
         </div>
 
+        {/* WHAT TO READ NEXT Section */}
+        {allBooks.length > 1 && (
+          <div className="mt-12 p-6 md:p-8 rounded-2xl bg-card/40 border border-border/60 shadow-lg space-y-6">
+            <div className="text-center space-y-1">
+              <span className="text-xs font-mono text-crimson uppercase tracking-widest font-bold block">
+                CONTINUE THE NOBI NARRATIVE UNIVERSE
+              </span>
+              <h3 className="text-xl sm:text-2xl font-serif font-black uppercase text-foreground">
+                WHAT TO READ NEXT
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {allBooks
+                .filter((b) => b.slug !== currentBook.slug)
+                .slice(0, 3)
+                .map((nextBook) => (
+                  <Link
+                    key={nextBook.slug}
+                    href={`/books/${nextBook.slug}`}
+                    className="p-4 rounded-xl bg-background border border-border/50 hover:border-crimson/50 transition-all flex flex-col justify-between space-y-3 group"
+                  >
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-crimson uppercase font-bold block">
+                        {nextBook.genre || 'Psychological Thriller'}
+                      </span>
+                      <h4 className="text-sm font-serif font-bold text-foreground group-hover:text-crimson transition-colors">
+                        {nextBook.title}
+                      </h4>
+                    </div>
+                    <span className="text-xs font-mono text-crimson font-bold uppercase tracking-wider">
+                      READ CASE →
+                    </span>
+                  </Link>
+                ))}
+            </div>
+          </div>
+        )}
+
         {/* Reader Action CTA */}
-        <div className="mt-12">
+        <div className="mt-8">
           <BookCTASection bookTitle={currentBook.title} amazonReviewUrl={currentBook.amazonLink} />
         </div>
 

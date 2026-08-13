@@ -1,95 +1,89 @@
 import * as React from 'react';
 import Link from 'next/link';
-import NewsletterSignup from './NewsletterSignup';
 
 export default function HeroSection() {
   return (
     <section
-      aria-label="Author Entrance Portal"
-      className="w-full min-h-screen relative bg-neutral-950 text-white overflow-hidden flex flex-col justify-between"
+      aria-label="Author Archive Entrance"
+      className="w-full relative bg-neutral-950 text-white overflow-hidden py-16 md:py-24 border-b border-border/40"
     >
-      {/* Split Screen Portal (Full Height) */}
-      <div className="relative w-full flex-1 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-800">
-        {/* Left Half: THE NOVELIST / AUTHOR (Dark background with Author Portrait) */}
-        <div className="relative min-h-[45vh] md:min-h-full flex flex-col justify-center items-center p-8 md:p-14 overflow-hidden group">
-          {/* Author Speaker Background Image */}
-          <div className="absolute inset-0 z-0">
-            <img
-              src="/assets/nobi-author.png"
-              alt="Nobi Kumar Author"
-              className="w-full h-full object-cover object-top filter brightness-[0.4] group-hover:brightness-[0.5] transition-all duration-700 scale-100 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-          </div>
+      {/* Background Subtle Grid Texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293710_1px,transparent_1px),linear-gradient(to_bottom,#1f293710_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none" />
 
-          {/* Left Portal Overlay */}
-          <div className="relative z-10 text-center space-y-6 max-w-md mx-auto">
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-px w-12 bg-neutral-400" />
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light tracking-[0.25em] text-white uppercase">
-                THE NOVELIST
-              </h2>
-              <div className="h-px w-12 bg-neutral-400" />
+      <div className="max-w-6xl mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Editorial Content Area */}
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-crimson uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-crimson animate-pulse" />
+              <span>NOBI KUMAR / AUTHOR DOSSIER 001</span>
             </div>
 
-            <p className="text-xs md:text-sm font-sans text-neutral-300 max-w-sm mx-auto leading-relaxed">
-              Explore psychological thrillers, dark campus mysteries, and the Verma Saga catalog.
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-black tracking-tight text-white uppercase">
+                NOBI KUMAR
+              </h1>
+              <p className="text-sm sm:text-base font-mono text-neutral-400 uppercase tracking-widest">
+                Psychological Thrillers · Dark Fiction · The Nobi Narrative Universe
+              </p>
+            </div>
+
+            <blockquote className="border-l-2 border-crimson pl-4 py-1 text-base sm:text-lg font-serif italic text-neutral-300 max-w-xl mx-auto lg:mx-0">
+              &ldquo;Every shadow leaves a story behind.&rdquo;
+            </blockquote>
+
+            <p className="text-xs sm:text-sm font-sans text-neutral-400 max-w-xl leading-relaxed mx-auto lg:mx-0">
+              Welcome to the private archive of Nobi Kumar. Step inside to explore dark campus
+              mysteries, psychological suspense, interconnected character files, and the secrets of
+              the Verma Saga.
             </p>
 
-            <div className="pt-4">
+            {/* CTA Toolbar */}
+            <div className="pt-4 flex flex-wrap gap-4 justify-center lg:justify-start">
               <Link
                 href="/books"
-                className="inline-block px-8 py-3.5 bg-white/10 hover:bg-white text-white hover:text-black border border-white/40 text-xs font-mono font-bold uppercase tracking-[0.2em] rounded-none transition-all duration-300 shadow-xl"
+                className="px-6 py-3.5 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-widest rounded-lg transition-all shadow-lg hover:scale-105"
               >
-                ENTER NOVELS ARCHIVE →
+                EXPLORE THE BOOKS →
               </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Half: THE WRITER & UNIVERSE (High Contrast Clean White Background) */}
-        <div className="relative min-h-[45vh] md:min-h-full flex flex-col justify-center items-center p-8 md:p-14 bg-white text-neutral-900 overflow-hidden group">
-          {/* Right Portal Overlay */}
-          <div className="relative z-10 text-center space-y-6 max-w-md mx-auto">
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-px w-12 bg-neutral-400" />
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light tracking-[0.25em] text-neutral-900 uppercase">
-                THE WRITER
-              </h2>
-              <div className="h-px w-12 bg-neutral-400" />
-            </div>
-
-            <p className="text-xs md:text-sm font-sans text-neutral-600 max-w-sm mx-auto leading-relaxed">
-              Discover the Nobi Narrative Universe (NNU) map, character archives, and author
-              chronicles.
-            </p>
-
-            <div className="pt-4 flex flex-wrap justify-center gap-3">
               <Link
                 href="/universe"
-                className="px-8 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-mono font-bold uppercase tracking-[0.2em] rounded-none transition-all duration-300 shadow-xl"
+                className="px-6 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 text-xs font-mono font-bold uppercase tracking-widest rounded-lg transition-all"
               >
-                ENTER UNIVERSE MAP →
+                ENTER THE UNIVERSE
               </Link>
               <Link
                 href="/blog"
-                className="px-8 py-3.5 bg-transparent hover:bg-neutral-100 text-neutral-900 border border-neutral-900 text-xs font-mono font-bold uppercase tracking-[0.2em] rounded-none transition-all duration-300"
+                className="px-6 py-3.5 bg-transparent hover:bg-neutral-900 text-neutral-300 border border-neutral-800 text-xs font-mono font-bold uppercase tracking-widest rounded-lg transition-all"
               >
-                READ CHRONICLES
+                READ THE CHRONICLES
               </Link>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Signature Center Badge (Identical to chetanbhagat.com center signature block) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 hidden md:block">
-        <div className="bg-white px-8 py-5 rounded-md shadow-2xl border border-neutral-200 transform hover:scale-105 transition-transform duration-300">
-          <img
-            src="/assets/nobi-signature.png"
-            alt="Nobi Kumar Signature Logo"
-            className="h-16 w-auto object-contain"
-          />
+          {/* Right Editorial Dossier Image */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="relative w-72 sm:w-80 md:w-96 rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 shadow-2xl group">
+              <img
+                src="/assets/nobi-author.png"
+                alt="Nobi Kumar Author Portrait"
+                className="w-full h-auto object-cover filter brightness-90 contrast-105 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+
+              <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/70 backdrop-blur-md border border-neutral-800/80 text-left space-y-1">
+                <span className="text-[10px] font-mono text-crimson font-bold uppercase tracking-widest block">
+                  ARCHIVAL RECORD
+                </span>
+                <p className="text-xs font-serif font-bold text-white">
+                  Nobi Kumar — Author & Storyteller
+                </p>
+                <p className="text-[10px] font-mono text-neutral-400">
+                  NNU Universe Files · Verma Saga
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

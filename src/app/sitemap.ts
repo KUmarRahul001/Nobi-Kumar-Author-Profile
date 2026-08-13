@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Cache sitemap for 1 hour to boost performance
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
@@ -48,6 +48,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/press`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/editorial-policy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
       url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
@@ -59,64 +71,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
-    {
-      url: `${baseUrl}/editorial-policy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/press`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
   ];
 
-  // Load books dynamically from Supabase
-  let bookSlugs: string[] = [];
+  // Dynamic books from Supabase
+  let bookRoutes: MetadataRoute.Sitemap = [];
   try {
     const supabase = await createClient();
-    const { data: dbBooks } = await supabase.from('Book').select('slug');
+    const { data: dbBooks } = await supabase.from('Book').select('slug, updatedAt');
     if (dbBooks && dbBooks.length > 0) {
-      bookSlugs = dbBooks.map((b) => b.slug);
+      bookRoutes = dbBooks.flatMap((b) => [
+        {
+          url: `${baseUrl}/books/${b.slug}`,
+          lastModified: b.updatedAt ? new Date(b.updatedAt) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.9,
+        },
+        {
+          url: `${baseUrl}/books/${b.slug}/sample`,
+          lastModified: b.updatedAt ? new Date(b.updatedAt) : new Date(),
+          changeFrequency: 'monthly',
+          priority: 0.7,
+        },
+      ]);
     }
   } catch {}
 
-  const bookRoutes: MetadataRoute.Sitemap = bookSlugs.flatMap((slug) => [
-    {
-      url: `${baseUrl}/books/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/books/${slug}/sample`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-  ]);
-
-  // Load blog posts dynamically from Supabase
-  let blogSlugs: string[] = ['welcome-to-the-universe'];
+  // Dynamic blog posts from Supabase
+  let blogRoutes: MetadataRoute.Sitemap = [];
   try {
     const supabase = await createClient();
     const { data: dbPosts } = await supabase
       .from('Post')
-      .select('slug, publishedAt')
+      .select('slug, updatedAt, publishedAt')
       .eq('status', 'published');
     if (dbPosts && dbPosts.length > 0) {
-      blogSlugs = dbPosts.map((p) => p.slug);
+      blogRoutes = dbPosts.map((p) => ({
+        url: `${baseUrl}/blog/${p.slug}`,
+        lastModified:
+          p.updatedAt || p.publishedAt ? new Date(p.updatedAt || p.publishedAt) : new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+      }));
     }
   } catch {}
-
-  const blogRoutes: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
-    url: `${baseUrl}/blog/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
 
   return [...staticRoutes, ...bookRoutes, ...blogRoutes];
 }
