@@ -1,19 +1,20 @@
 /**
  * src/app/api/cron/generate-blog/route.ts
- * Automated Daily Blog Generation & Automated Beehiiv Newsletter Dispatch
- * Engine: Free Gemini 1.5/2.0 API Key via Google AI Studio
- * Can be triggered daily via Vercel Cron, Netlify Scheduled Functions, or external CRON.
+ * Production-Hardened Automated AI Blog Generation & Beehiiv Newsletter Engine
+ * Supports Timing-Safe Cron Auth, Upstash Idempotency & Rate Limiting, AI Fallback, HTML Sanitization, and Emergency Shutdown.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
-import { cacheDel } from '@/lib/redis';
+import { cacheDel, redis } from '@/lib/redis';
+import { NobiAIEngine } from '@/lib/nobi-ai-engine';
 import { triggerAutomatedNewsletterBroadcast } from '@/lib/newsletter-automation';
 
 export const runtime = 'nodejs';
 export const revalidate = 0;
 
-// Knowledge Base Topics & Prompts for Nobi Kumar Chronicles
-const CHRONICLE_TOPICS = [
+// Nobi Kumar Knowledge Base Topics
+const KNOWLEDGE_BASE_TOPICS = [
   {
     category: 'Case Files',
     topic: 'The Psychological Anatomy of St. Jude College Stairwell Incident',
@@ -42,157 +43,170 @@ const CHRONICLE_TOPICS = [
   },
 ];
 
+function isTimingSafeMatch(inputSecret: string, validSecret: string): boolean {
+  try {
+    const inputBuf = Buffer.from(inputSecret);
+    const validBuf = Buffer.from(validSecret);
+    if (inputBuf.length !== validBuf.length) return false;
+    return timingSafeEqual(inputBuf, validBuf);
+  } catch {
+    return false;
+  }
+}
+
+async function verifyCronAuth(req: NextRequest): Promise<boolean> {
+  const cronSecret =
+    process.env.BLOG_CRON_SECRET || process.env.CRON_SECRET || process.env.ADMIN_PASSCODE;
+  if (!cronSecret) return false;
+
+  const authHeader = req.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const xCronHeader = req.headers.get('x-cron-secret');
+
+  const tokenToTest = bearerToken || xCronHeader;
+  if (!tokenToTest) return false;
+
+  return isTimingSafeMatch(tokenToTest, cronSecret);
+}
+
 function slugify(title: string): string {
   return title
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .concat(`-${Date.now().toString().slice(-4)}`);
+    .replace(/-+/g, '-');
 }
 
 export async function GET(req: NextRequest) {
-  return handleGenerateBlog(req);
+  return handleAutomatedGeneration(req);
 }
 
 export async function POST(req: NextRequest) {
-  return handleGenerateBlog(req);
+  return handleAutomatedGeneration(req);
 }
 
-async function handleGenerateBlog(req: NextRequest) {
-  // Verify Cron authorization secret or admin session
-  const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET || process.env.ADMIN_PASSCODE;
-  const isCronValid =
-    cronSecret &&
-    (authHeader === `Bearer ${cronSecret}` || req.headers.get('x-cron-secret') === cronSecret);
-  const isDev = process.env.NODE_ENV === 'development';
-
-  if (!isCronValid && !isDev) {
-    // Allow public or authorized cron trigger for maintenance
+async function handleAutomatedGeneration(req: NextRequest) {
+  // 1. Emergency Kill Switch Check
+  if (process.env.BLOG_AUTOMATION_ENABLED === 'false') {
+    return NextResponse.json(
+      { error: 'Blog automation is currently disabled via kill switch.' },
+      { status: 503 }
+    );
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+  // 2. Strict Timing-Safe Authentication Check
+  const isAuthorized = await verifyCronAuth(req);
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Unauthorized: Invalid cron credentials.' }, { status: 401 });
+  }
 
-  // Select random topic from Knowledge Base
-  const randomTopic = CHRONICLE_TOPICS[Math.floor(Math.random() * CHRONICLE_TOPICS.length)];
-
-  let generatedPost = {
-    title: `${randomTopic.topic}`,
-    slug: slugify(randomTopic.topic),
-    excerpt: `An exclusive archival entry exploring ${randomTopic.theme.toLowerCase()}`,
-    content: `Welcome to the official Nobi Kumar Archive.\n\nIn this classified case file entry, we dive deep into ${randomTopic.topic}. ${randomTopic.theme}\n\nEvery shadow leaves a story behind. Explore our published novels and universe map for full character dossier details.`,
-    category: randomTopic.category,
-    tags: 'Nobi Kumar, Thriller, NNU, Verma Saga, Case File',
-    readingTime: '4 min read',
-    coverUrl: '/assets/nobi-author.png',
-  };
-
-  // If Gemini API Key is available, use free Gemini API for AI generation
-  if (apiKey) {
-    try {
-      const promptText = `
-You are writing an official blog article for author Nobi Kumar (author of psychological thrillers and the Nobi Narrative Universe - NNU).
-Topic: ${randomTopic.topic}
-Category: ${randomTopic.category}
-Key Themes: ${randomTopic.theme}
-
-Author Identity:
-- Nobi Kumar writes psychological thrillers, dark campus mysteries, and interconnected suspense stories inside the Nobi Narrative Universe (Verma Saga).
-- Tagline: "Every shadow leaves a story behind."
-
-Output strictly valid JSON with this exact structure:
-{
-  "title": "Compelling Title",
-  "excerpt": "Brief 1-2 sentence hook excerpt",
-  "content": "Full article body (300-500 words written in cinematic, mysterious, literary prose with paragraph breaks)",
-  "tags": "Comma-separated tags",
-  "readingTime": "X min read"
-}
-`;
-
-      const aiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: { responseMimeType: 'application/json' },
-          }),
-        }
+  // 3. Idempotency Check (Prevent duplicate cron triggers within 12 hours)
+  const todayKey = `cron:blog:idempotency:${new Date().toISOString().split('T')[0]}`;
+  try {
+    const alreadyRun = await redis.get(todayKey);
+    if (alreadyRun) {
+      return NextResponse.json(
+        { message: 'Already processed automated blog generation for today.', status: 'skipped' },
+        { status: 200 }
       );
-
-      if (aiResponse.ok) {
-        const aiData = await aiResponse.json();
-        const rawText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const parsed = JSON.parse(rawText);
-          generatedPost = {
-            ...generatedPost,
-            title: parsed.title || generatedPost.title,
-            slug: slugify(parsed.title || generatedPost.title),
-            excerpt: parsed.excerpt || generatedPost.excerpt,
-            content: parsed.content || generatedPost.content,
-            tags: parsed.tags || generatedPost.tags,
-            readingTime: parsed.readingTime || generatedPost.readingTime,
-          };
-        }
-      }
-    } catch (err) {
-      console.warn('[AI Generation Exception - Fallback to Knowledge Base Template]', err);
     }
-  }
+  } catch {}
+
+  // Select Topic from Knowledge Base
+  const randomTopic =
+    KNOWLEDGE_BASE_TOPICS[Math.floor(Math.random() * KNOWLEDGE_BASE_TOPICS.length)];
+
+  // 4. Generate Article & SEO via Nobi AI Engine (Provider Independent + Timeout Bounded)
+  const aiResult = await NobiAIEngine.generateBlog({
+    topic: randomTopic.topic,
+    category: randomTopic.category,
+    theme: randomTopic.theme,
+  });
+
+  const uniqueSlug = `${aiResult.seo.slug}-${Date.now().toString().slice(-4)}`;
 
   try {
     const supabase = await createClient();
 
-    // Insert new post into database
+    // 5. Check Duplicate Post Title in Database
+    const { data: existing } = await supabase
+      .from('Post')
+      .select('id')
+      .eq('title', aiResult.title)
+      .single();
+
+    if (existing) {
+      return NextResponse.json(
+        {
+          message: 'Topic already generated recently. Skipping duplicate.',
+          status: 'duplicate_skipped',
+        },
+        { status: 200 }
+      );
+    }
+
+    // 6. Insert Sanitized Article into Supabase
     const { data: post, error } = await supabase
       .from('Post')
       .insert({
-        title: generatedPost.title,
-        slug: generatedPost.slug,
-        excerpt: generatedPost.excerpt,
-        content: generatedPost.content,
-        category: generatedPost.category,
-        tags: generatedPost.tags,
-        readingTime: generatedPost.readingTime,
-        coverUrl: generatedPost.coverUrl,
+        title: aiResult.title,
+        slug: uniqueSlug,
+        excerpt: aiResult.excerpt,
+        content: aiResult.content,
+        category: randomTopic.category,
+        tags: aiResult.tags,
+        readingTime: aiResult.readingTime,
+        coverUrl: '/assets/nobi-author.png',
         status: 'published',
         publishedAt: new Date().toISOString(),
+        seoTitle: aiResult.seo.title,
+        seoDescription: aiResult.seo.metaDescription,
       })
       .select()
       .single();
 
-    if (error) {
-      console.error('[Database Insert Error - Auto Blog]', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error || !post) {
+      return NextResponse.json(
+        { error: error?.message || 'Database insert failed' },
+        { status: 500 }
+      );
     }
 
-    // Invalidate Redis caches
+    // Mark Idempotency key for 12 hours
+    try {
+      await redis.set(todayKey, post.id, { ex: 43200 });
+    } catch {}
+
+    // Invalidate Redis Caches
     await cacheDel('posts:all');
     await cacheDel(`posts:${post.slug}`);
 
-    // Trigger Automated Beehiiv Newsletter Broadcast
+    // 8. Trigger Automated Newsletter Broadcast (Idempotent)
     let newsletterResult = { success: false, message: 'Skipped' };
-    try {
-      newsletterResult = await triggerAutomatedNewsletterBroadcast({
-        type: 'chronicle',
-        title: post.title,
-        summary: post.excerpt,
-        url: `/blog/${post.slug}`,
-        coverUrl: post.coverUrl,
-      });
-    } catch (newsErr: any) {
-      console.error('[Newsletter Broadcast Error - Auto Blog]', newsErr);
+    if (process.env.BLOG_AUTO_NEWSLETTER !== 'false') {
+      try {
+        newsletterResult = await triggerAutomatedNewsletterBroadcast({
+          type: 'chronicle',
+          title: post.title,
+          summary: post.excerpt,
+          url: `/blog/${post.slug}`,
+          coverUrl: post.coverUrl,
+        });
+      } catch (newsErr: any) {
+        console.error('[Automated Newsletter Trigger Error]', newsErr);
+      }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Automated daily blog created and newsletter broadcast sent.',
-      post,
+      message: 'Automated daily blog generated, sanitized, and published safely.',
+      providerUsed: aiResult.providerUsed,
+      post: {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+      },
       newsletterResult,
     });
   } catch (err: any) {
