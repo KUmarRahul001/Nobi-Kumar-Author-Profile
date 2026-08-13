@@ -47,14 +47,42 @@ export default function AdminBlogClient({ posts: initialPosts }: { posts: Post[]
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search blog posts by title or category..."
-        className="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-red-600/50"
-      />
+      {/* Toolbar & Instant AI Generator */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search blog posts by title or category..."
+          className="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-red-600/50"
+        />
+
+        <button
+          onClick={async () => {
+            if (
+              !confirm(
+                'Generate an automated AI Chronicle from the Nobi Kumar Knowledge Base and broadcast it immediately to your Beehiiv subscribers?'
+              )
+            )
+              return;
+            try {
+              const res = await fetch('/api/cron/generate-blog', { method: 'POST' });
+              const data = await res.json();
+              if (res.ok && data.post) {
+                setPosts((prev) => [data.post, ...prev]);
+                alert(`✓ Success! New article "${data.post.title}" published & newsletter sent.`);
+              } else {
+                alert(`Error: ${data.error || 'Failed to generate post'}`);
+              }
+            } catch (err: any) {
+              alert(`Error: ${err.message || 'Failed to trigger AI generation'}`);
+            }
+          }}
+          className="px-4 py-2.5 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+        >
+          <span>🤖 Trigger AI Blog & Newsletter</span>
+        </button>
+      </div>
 
       {/* Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
