@@ -32,29 +32,32 @@ const BookInputSchema = z.object({
   tags: z.array(z.string()).or(z.string()).optional(),
   shortDescription: z.string().min(1, 'Short description is required.'),
   fullSynopsis: z.string().min(1, 'Full synopsis is required.'),
-  releaseDate: z.string().min(1, 'Release date is required.'),
+  releaseDate: z
+    .string()
+    .optional()
+    .default(() => new Date().toISOString().split('T')[0]),
   isbn: z.string().optional(),
-  language: z.string().min(1, 'Language is required.'),
+  language: z.string().optional().default('English'),
   pages: z.number().int().optional(),
   readingTime: z.string().optional(),
-  status: z.enum(['published', 'coming-soon', 'draft']),
-  coverUrl: z.string().url('Invalid cover URL').or(z.literal('')).optional(),
-  bannerUrl: z.string().url('Invalid banner URL').or(z.literal('')).optional(),
-  trailerLink: z.string().url('Invalid trailer URL').or(z.literal('')).optional(),
-  samplePdfUrl: z.string().url('Invalid sample PDF URL').or(z.literal('')).optional(),
-  previewUrl: z.string().url('Invalid preview URL').or(z.literal('')).optional(),
-  amazonLink: z.string().url('Invalid Amazon URL').or(z.literal('')).optional(),
-  googlePlayLink: z.string().url('Invalid Google Play URL').or(z.literal('')).optional(),
-  appleBooksLink: z.string().url('Invalid Apple Books URL').or(z.literal('')).optional(),
-  koboLink: z.string().url('Invalid Kobo URL').or(z.literal('')).optional(),
-  paperbackLink: z.string().url('Invalid Paperback URL').or(z.literal('')).optional(),
-  hardcoverLink: z.string().url('Invalid Hardcover URL').or(z.literal('')).optional(),
-  officialWebsiteLink: z.string().url('Invalid Website URL').or(z.literal('')).optional(),
-  customLink: z.string().url('Invalid Custom URL').or(z.literal('')).optional(),
-  pocketFmLink: z.string().url('Invalid Pocket FM URL').or(z.literal('')).optional(),
-  kukuFmLink: z.string().url('Invalid Kuku FM URL').or(z.literal('')).optional(),
-  audibleLink: z.string().url('Invalid Audible URL').or(z.literal('')).optional(),
-  storytelLink: z.string().url('Invalid Storytel URL').or(z.literal('')).optional(),
+  status: z.enum(['published', 'coming-soon', 'draft']).optional().default('published'),
+  coverUrl: z.string().url('Invalid cover URL').or(z.literal('')).optional().catch(''),
+  bannerUrl: z.string().url('Invalid banner URL').or(z.literal('')).optional().catch(''),
+  trailerLink: z.string().url('Invalid trailer URL').or(z.literal('')).optional().catch(''),
+  samplePdfUrl: z.string().url('Invalid sample PDF URL').or(z.literal('')).optional().catch(''),
+  previewUrl: z.string().url('Invalid preview URL').or(z.literal('')).optional().catch(''),
+  amazonLink: z.string().url('Invalid Amazon URL').or(z.literal('')).optional().catch(''),
+  googlePlayLink: z.string().url('Invalid Google Play URL').or(z.literal('')).optional().catch(''),
+  appleBooksLink: z.string().url('Invalid Apple Books URL').or(z.literal('')).optional().catch(''),
+  koboLink: z.string().url('Invalid Kobo URL').or(z.literal('')).optional().catch(''),
+  paperbackLink: z.string().url('Invalid Paperback URL').or(z.literal('')).optional().catch(''),
+  hardcoverLink: z.string().url('Invalid Hardcover URL').or(z.literal('')).optional().catch(''),
+  officialWebsiteLink: z.string().url('Invalid Website URL').or(z.literal('')).optional().catch(''),
+  customLink: z.string().url('Invalid Custom URL').or(z.literal('')).optional().catch(''),
+  pocketFmLink: z.string().url('Invalid Pocket FM URL').or(z.literal('')).optional().catch(''),
+  kukuFmLink: z.string().url('Invalid Kuku FM URL').or(z.literal('')).optional().catch(''),
+  audibleLink: z.string().url('Invalid Audible URL').or(z.literal('')).optional().catch(''),
+  storytelLink: z.string().url('Invalid Storytel URL').or(z.literal('')).optional().catch(''),
   ageRating: z.string().optional(),
   contentWarning: z.string().optional(),
   authorNotes: z.string().optional(),
@@ -284,8 +287,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = BookInputSchema.safeParse(body);
     if (!parsed.success) {
+      const errorMsg = parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || 'field'}: ${issue.message}`)
+        .join(', ');
       return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.issues },
+        { error: `Validation failed: ${errorMsg}`, details: parsed.error.issues },
         { status: 400 }
       );
     }
@@ -340,8 +346,11 @@ export async function PUT(req: NextRequest) {
 
     const parsed = BookInputSchema.safeParse(body);
     if (!parsed.success) {
+      const errorMsg = parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || 'field'}: ${issue.message}`)
+        .join(', ');
       return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.issues },
+        { error: `Validation failed: ${errorMsg}`, details: parsed.error.issues },
         { status: 400 }
       );
     }
