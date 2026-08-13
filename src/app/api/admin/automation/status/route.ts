@@ -48,23 +48,40 @@ export async function GET(req: NextRequest) {
   }
 
   const enabled = process.env.BLOG_AUTOMATION_ENABLED !== 'false';
-  const aiProvider = process.env.AI_PROVIDER || 'gemini';
+  const aiPrimaryProvider =
+    process.env.AI_PRIMARY_PROVIDER || process.env.AI_PROVIDER || 'openrouter';
+  const openrouterFreeOnly = process.env.OPENROUTER_FREE_ONLY !== 'false';
   const newsletterEnabled = Boolean(process.env.BEEHIIV_API_KEY);
+
+  // Calculate Next IST Slots
+  const now = new Date();
+  const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  const hour = istTime.getUTCHours();
+
+  const todayStr = istTime.toISOString().split('T')[0];
+  const nextSlot09 = hour < 9 ? `${todayStr}T09:00:00+05:30` : `Tomorrow 09:00 IST`;
+  const nextSlot21 = hour < 21 ? `${todayStr}T21:00:00+05:30` : `Tomorrow 21:00 IST`;
 
   let lastRun = null;
   let totalPosts = 0;
+  let latestPostDetails = null;
 
   try {
     const supabase = await createClient();
     const { data: latestPost } = await supabase
       .from('Post')
-      .select('title, createdAt, publishedAt')
+      .select('id, title, slug, createdAt, publishedAt')
       .order('createdAt', { ascending: false })
       .limit(1)
       .single();
 
     if (latestPost) {
       lastRun = latestPost.publishedAt || latestPost.createdAt;
+      latestPostDetails = {
+        id: latestPost.id,
+        title: latestPost.title,
+        slug: latestPost.slug,
+      };
     }
 
     const { count } = await supabase.from('Post').select('*', { count: 'exact', head: true });
@@ -73,9 +90,19 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     enabled,
-    aiProvider,
+    schedule: {
+      slots: ['09:00 Asia/Kolkata', '21:00 Asia/Kolkata'],
+      next0900Slot: nextSlot09,
+      next2100Slot: nextSlot21,
+      timezone: 'Asia/Kolkata',
+    },
+    aiConfig: {
+      primaryProvider: aiPrimaryProvider,
+      freeOnly: openrouterFreeOnly,
+    },
     newsletterEnabled,
     lastRun,
+    latestPost: latestPostDetails,
     totalPosts,
     status: enabled ? 'OPERATIONAL' : 'EMERGENCY_STOPPED',
   });

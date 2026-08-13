@@ -1,0 +1,31 @@
+name: Daily AI Blog & Newsletter Scheduler
+
+on:
+  schedule:
+    # 09:00 IST = 03:30 UTC
+    - cron: '30 3 * * *'
+    # 21:00 IST = 15:30 UTC
+    - cron: '30 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  trigger-automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Production AI Blog Generation & Newsletter
+        run: |
+          echo "Triggering automated AI Blog Generation for nobikumar.netlify.app..."
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST "https://nobikumar.netlify.app/api/cron/generate-blog" \
+            -H "Authorization: Bearer ${{ secrets.BLOG_CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+          
+          HTTP_CODE="${RESPONSE:${#RESPONSE}-3}"
+          BODY="${RESPONSE:0:${#RESPONSE}-3}"
+          
+          echo "HTTP Response Status: $HTTP_CODE"
+          echo "HTTP Response Body: $BODY"
+          
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Cron trigger failed with HTTP status $HTTP_CODE"
+            exit 1
+          fi
