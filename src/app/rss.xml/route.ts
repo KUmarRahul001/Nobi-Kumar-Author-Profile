@@ -6,7 +6,7 @@ export async function GET() {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : 'https://authornobikumar.netlify.app';
+      : 'https://nobikumar.netlify.app';
 
   const posts = await getPosts();
 

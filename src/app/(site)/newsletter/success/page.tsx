@@ -5,7 +5,7 @@ import Breadcrumbs from '@/components/atoms/Breadcrumbs';
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
     ? process.env.NEXT_PUBLIC_SITE_URL
-    : 'https://authornobikumar.netlify.app';
+    : 'https://nobikumar.netlify.app';
 
 export const metadata: Metadata = {
   title: 'Subscription Confirmed | Nobi Kumar Reader’s Club',

@@ -22,8 +22,8 @@ export default function TermsPage() {
 
         <div className="prose dark:prose-invert max-w-none text-sm text-muted leading-relaxed space-y-4 font-sans">
           <p>
-            By accessing <strong>https://authornobikumar.netlify.app</strong>, you agree to comply
-            with and be bound by the following terms of service.
+            By accessing <strong>https://nobikumar.netlify.app</strong>, you agree to comply with
+            and be bound by the following terms of service.
           </p>
 
           <h2 className="text-lg font-serif font-bold text-foreground">1. Intellectual Property</h2>
@@ -40,8 +40,8 @@ export default function TermsPage() {
           <p>
             AI search engines, answer engines, and LLM research crawlers are granted permission to
             cite, summarize, and reference content from this website and <code>/llms.txt</code>{' '}
-            provided proper attribution and linkbacks to{' '}
-            <code>https://authornobikumar.netlify.app</code> are maintained.
+            provided proper attribution and linkbacks to <code>https://nobikumar.netlify.app</code>{' '}
+            are maintained.
           </p>
 
           <h2 className="text-lg font-serif font-bold text-foreground">3. Governing Contact</h2>

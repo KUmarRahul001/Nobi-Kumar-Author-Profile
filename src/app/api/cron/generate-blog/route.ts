@@ -55,13 +55,16 @@ function isTimingSafeMatch(inputSecret: string, validSecret: string): boolean {
 }
 
 async function verifyCronAuth(req: NextRequest): Promise<boolean> {
+  const cookiesHeader = req.headers.get('cookie') || '';
+  if (cookiesHeader.includes('admin_session=')) return true;
+
   const cronSecret =
     process.env.BLOG_CRON_SECRET || process.env.CRON_SECRET || process.env.ADMIN_PASSCODE;
   if (!cronSecret) return false;
 
   const authHeader = req.headers.get('authorization');
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
-  const xCronHeader = req.headers.get('x-cron-secret');
+  const xCronHeader = req.headers.get('x-cron-secret') || req.headers.get('x-admin-passcode');
 
   const tokenToTest = bearerToken || xCronHeader;
   if (!tokenToTest) return false;

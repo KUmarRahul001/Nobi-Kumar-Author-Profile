@@ -18,7 +18,7 @@ export function generateAndValidateSEO(title: string, excerpt: string, slug: str
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : 'https://authornobikumar.netlify.app';
+      : 'https://nobikumar.netlify.app';
 
   const cleanTitle = title.trim().slice(0, 60);
   const cleanDescription = (excerpt || title).trim().slice(0, 155);

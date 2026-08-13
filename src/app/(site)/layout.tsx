@@ -20,7 +20,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : 'https://authornobikumar.netlify.app';
+      : 'https://nobikumar.netlify.app';
 
   const personSchema = {
     '@context': 'https://schema.org',

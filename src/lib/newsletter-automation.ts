@@ -35,7 +35,7 @@ export async function triggerAutomatedNewsletterBroadcast(payload: BroadcastPayl
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
       ? process.env.NEXT_PUBLIC_SITE_URL
-      : 'https://authornobikumar.netlify.app';
+      : 'https://nobikumar.netlify.app';
 
   const fullUrl = payload.url.startsWith('http') ? payload.url : `${siteUrl}${payload.url}`;
 

@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <div className="prose dark:prose-invert max-w-none text-sm text-muted leading-relaxed space-y-4 font-sans">
           <p>
             Welcome to the official author website of <strong>Nobi Kumar</strong> (
-            <code>https://authornobikumar.netlify.app</code>). Your privacy is important to us.
+            <code>https://nobikumar.netlify.app</code>). Your privacy is important to us.
           </p>
 
           <h2 className="text-lg font-serif font-bold text-foreground">1. Data Collection</h2>

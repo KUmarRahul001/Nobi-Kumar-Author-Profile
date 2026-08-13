@@ -10,7 +10,7 @@ export const AUTHOR_ENTITY = {
   tagline: 'Creator of the Nobi Narrative Universe & Verma Legacy Series',
   bio: 'Nobi Kumar is an Indian psychological thriller author known for campus mysteries, dark suspense, and complex character psychology. He is the creator of the interconnected Nobi Narrative Universe.',
   profileImage: '/assets/nobi-author.png',
-  canonicalUrl: 'https://authornobikumar.netlify.app',
+  canonicalUrl: 'https://nobikumar.netlify.app',
   email: 'contact@nobikumar.com',
   sameAs: {
     amazon: 'https://amazon.com/author/nobikumar',

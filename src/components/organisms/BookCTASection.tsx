@@ -22,10 +22,7 @@ export default function BookCTASection({
       text: bookTitle
         ? `Check out ${bookTitle} by psychological thriller author Nobi Kumar!`
         : 'Explore psychological thrillers by author Nobi Kumar.',
-      url:
-        typeof window !== 'undefined'
-          ? window.location.href
-          : 'https://authornobikumar.netlify.app',
+      url: typeof window !== 'undefined' ? window.location.href : 'https://nobikumar.netlify.app',
     };
 
     if (typeof navigator !== 'undefined' && navigator.share) {
