@@ -34,9 +34,9 @@ describe('Idempotency & Scheduler Unit Tests', () => {
     vi.clearAllMocks();
   });
 
-  it('resolves deterministic run IDs for 09:00 and 21:00 IST slots', () => {
+  it('resolves deterministic run IDs for 09:00, 18:00, and 21:00 IST slots', () => {
     const runIdDefault = resolveGenerationRunId();
-    expect(runIdDefault).toMatch(/^blog:scheduled:\d{4}-\d{2}-\d{2}T(09|21):00$/);
+    expect(runIdDefault).toMatch(/^blog:scheduled:\d{4}-\d{2}-\d{2}T(09|18|21):00$/);
   });
 
   it('resolves manual run IDs for admin triggers', () => {

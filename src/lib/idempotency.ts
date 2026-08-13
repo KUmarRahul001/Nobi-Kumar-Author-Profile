@@ -49,15 +49,15 @@ export function resolveGenerationRunId(req?: Request, explicitRunId?: string): s
     }
   }
 
-  // 2. Default Scheduled Run ID based on IST Time Slot (09:00 or 21:00 slot support)
+  // 2. Default Scheduled Run ID based on IST Time Slot (09:00, 18:00, or 21:00 slot support)
   const now = new Date();
   // IST offset: UTC + 5.5 hours
   const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
   const dateStr = istTime.toISOString().split('T')[0]; // YYYY-MM-DD
   const hour = istTime.getUTCHours();
 
-  // Slot: 00:00 - 11:59 -> 09:00 slot, 12:00 - 23:59 -> 21:00 slot
-  const slotStr = hour < 12 ? '09:00' : '21:00';
+  // Slot: <12 -> 09:00, 12-19 -> 18:00 (6 PM IST), >=20 -> 21:00 slot
+  const slotStr = hour < 12 ? '09:00' : hour < 20 ? '18:00' : '21:00';
   return `blog:scheduled:${dateStr}T${slotStr}`;
 }
 
