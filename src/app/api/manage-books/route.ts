@@ -16,6 +16,7 @@ import {
 } from '@/lib/redis';
 import { z } from 'zod';
 import { Book } from '@/types/book';
+import { triggerAutomatedNewsletterBroadcast } from '@/lib/newsletter-automation';
 
 export const runtime = 'nodejs';
 
@@ -310,6 +311,22 @@ export async function POST(req: NextRequest) {
     if (error) throw error;
 
     const book = mapDbToBook(created);
+
+    // Automated Newsletter Broadcast trigger for new published books
+    if (book.status === 'published') {
+      try {
+        await triggerAutomatedNewsletterBroadcast({
+          type: 'book',
+          title: book.title,
+          subtitle: book.subtitle,
+          summary: book.shortDescription || book.fullSynopsis.slice(0, 200),
+          url: `/books/${book.slug}`,
+          coverUrl: book.coverUrl,
+        });
+      } catch (newsletterErr) {
+        console.error('[Automated Newsletter Trigger Error - Book]', newsletterErr);
+      }
+    }
 
     try {
       await cacheInvalidatePattern('books:*');

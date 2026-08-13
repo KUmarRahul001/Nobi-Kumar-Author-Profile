@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { cacheGet, cacheSet, cacheDel } from '@/lib/redis';
+import { triggerAutomatedNewsletterBroadcast } from '@/lib/newsletter-automation';
 
 const PostSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -110,6 +111,21 @@ export async function POST(req: Request) {
       .single();
 
     if (error) throw error;
+
+    // Automated Newsletter Broadcast trigger for new published Chronicles/Case Files
+    if (post.status === 'published') {
+      try {
+        await triggerAutomatedNewsletterBroadcast({
+          type: 'chronicle',
+          title: post.title,
+          summary: post.excerpt || post.content.slice(0, 200),
+          url: `/blog/${post.slug}`,
+          coverUrl: post.coverUrl,
+        });
+      } catch (newsletterErr) {
+        console.error('[Automated Newsletter Trigger Error - Post]', newsletterErr);
+      }
+    }
 
     await cacheDel('posts:all');
     await cacheDel(`posts:${post.slug}`);
