@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { getPostBySlug } from '@/lib/db';
 import BlogCommentSection from '@/components/organisms/BlogCommentSection';
 import Breadcrumbs from '@/components/molecules/Breadcrumbs';
-import AdsterraBanner from '@/components/atoms/AdsterraBanner';
+import NewsletterSignup from '@/components/organisms/NewsletterSignup';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,8 +106,37 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {post.body}
           </div>
 
-          {/* Adsterra Non-Intrusive Banner (Allowed Post Content) */}
-          <AdsterraBanner adKey="blog-post-banner" format="banner" />
+          {/* Continue Exploring Loop & Newsletter Signup */}
+          <div className="pt-8 space-y-8 border-t border-border">
+            <NewsletterSignup
+              title="Enjoyed this Case File?"
+              subtitle="Subscribe to receive new author case files, writing insights, and early chapter releases."
+              variant="card"
+            />
+
+            <div className="p-6 rounded-2xl bg-card/40 border border-border/60 space-y-4 text-center">
+              <span className="text-xs font-mono text-crimson uppercase tracking-widest font-bold block">
+                CONTINUE EXPLORING
+              </span>
+              <h3 className="text-xl font-serif font-black uppercase text-foreground">
+                DISCOVER THE NOBI NARRATIVE UNIVERSE
+              </h3>
+              <div className="flex flex-wrap gap-4 justify-center pt-2">
+                <a
+                  href="/books"
+                  className="px-5 py-2.5 rounded-lg bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
+                >
+                  Explore Novels →
+                </a>
+                <a
+                  href="/universe"
+                  className="px-5 py-2.5 rounded-lg bg-background border border-border hover:border-crimson/50 text-foreground text-xs font-mono font-bold uppercase tracking-wider transition-all"
+                >
+                  Enter Universe Map →
+                </a>
+              </div>
+            </div>
+          </div>
 
           {/* Comments Section Component (FR-07) */}
           <Suspense

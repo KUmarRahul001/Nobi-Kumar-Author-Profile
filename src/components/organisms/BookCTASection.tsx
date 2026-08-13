@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import Link from 'next/link';
 
@@ -12,6 +14,40 @@ export default function BookCTASection({
   bookTitle,
   amazonReviewUrl,
 }: BookCTASectionProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: bookTitle ? `${bookTitle} by Nobi Kumar` : 'Nobi Kumar Thrillers',
+      text: bookTitle
+        ? `Check out ${bookTitle} by psychological thriller author Nobi Kumar!`
+        : 'Explore psychological thrillers by author Nobi Kumar.',
+      url:
+        typeof window !== 'undefined'
+          ? window.location.href
+          : 'https://authornobikumar.netlify.app',
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        // Fall back to clipboard if user cancels or share API fails
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch (err) {
+        console.error('Failed to copy share link:', err);
+      }
+    }
+  };
+
   return (
     <section
       id="newsletter"
@@ -83,12 +119,12 @@ export default function BookCTASection({
             </p>
           </div>
           <div className="pt-2">
-            <Link
-              href="/books"
-              className="inline-block px-4 py-2 rounded-lg text-xs font-mono uppercase font-bold border border-border hover:bg-card transition-all text-foreground"
+            <button
+              onClick={handleShare}
+              className="inline-block px-4 py-2 rounded-lg text-xs font-mono uppercase font-bold border border-border hover:bg-card transition-all text-foreground cursor-pointer"
             >
-              Share Books
-            </Link>
+              {copied ? 'Link Copied ✓' : 'Share Link'}
+            </button>
           </div>
         </div>
       </div>
