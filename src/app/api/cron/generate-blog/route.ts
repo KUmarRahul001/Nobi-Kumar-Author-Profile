@@ -1,14 +1,19 @@
 /**
  * src/app/api/cron/generate-blog/route.ts
  * Production-Hardened Automated AI Blog Generation & Beehiiv Newsletter Engine
- * Supports Timing-Safe Cron Auth, Upstash Idempotency & Rate Limiting, AI Fallback, HTML Sanitization, and Emergency Shutdown.
+ * Supports Timing-Safe Cron Auth, Atomic Run Claims (SETNX), Generation Run IDs, AI Quality Gates, HTML Sanitization, and Emergency Shutdown.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
-import { cacheDel, redis } from '@/lib/redis';
+import { cacheDel } from '@/lib/redis';
 import { NobiAIEngine } from '@/lib/nobi-ai-engine';
 import { triggerAutomatedNewsletterBroadcast } from '@/lib/newsletter-automation';
+import {
+  resolveGenerationRunId,
+  claimGenerationRun,
+  finalizeGenerationRun,
+} from '@/lib/idempotency';
 
 export const runtime = 'nodejs';
 export const revalidate = 0;
@@ -72,15 +77,6 @@ async function verifyCronAuth(req: NextRequest): Promise<boolean> {
   return isTimingSafeMatch(tokenToTest, cronSecret);
 }
 
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
 export async function GET(req: NextRequest) {
   return handleAutomatedGeneration(req);
 }
@@ -98,58 +94,102 @@ async function handleAutomatedGeneration(req: NextRequest) {
     );
   }
 
-  // 2. Strict Timing-Safe Authentication Check
+  // 2. Strict Timing-Safe Authentication / Admin Session Check
   const isAuthorized = await verifyCronAuth(req);
   if (!isAuthorized) {
-    return NextResponse.json({ error: 'Unauthorized: Invalid cron credentials.' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized: Invalid credentials.' }, { status: 401 });
   }
 
-  // 3. Idempotency Check (Prevent duplicate cron triggers within 12 hours)
-  const todayKey = `cron:blog:idempotency:${new Date().toISOString().split('T')[0]}`;
-  try {
-    const alreadyRun = await redis.get(todayKey);
-    if (alreadyRun) {
+  // 3. Resolve & Claim Atomic Generation Run ID (Supports 09:00, 21:00 IST slots and manual runs)
+  const runId = resolveGenerationRunId(req);
+  const claim = await claimGenerationRun(runId);
+
+  if (!claim.claimed) {
+    if (claim.state?.status === 'completed') {
       return NextResponse.json(
-        { message: 'Already processed automated blog generation for today.', status: 'skipped' },
+        {
+          message: 'Generation run already completed for this scheduled slot.',
+          status: 'already_completed',
+          runId,
+          post: {
+            id: claim.state.postId,
+            slug: claim.state.postSlug,
+            title: claim.state.postTitle,
+          },
+          newsletterStatus: claim.state.newsletterStatus,
+        },
         { status: 200 }
       );
     }
-  } catch {}
+
+    if (claim.state?.status === 'running') {
+      return NextResponse.json(
+        {
+          message: 'Generation run currently in progress by another request.',
+          status: 'in_progress',
+          runId,
+        },
+        { status: 409 }
+      );
+    }
+  }
 
   // Select Topic from Knowledge Base
   const randomTopic =
     KNOWLEDGE_BASE_TOPICS[Math.floor(Math.random() * KNOWLEDGE_BASE_TOPICS.length)];
 
-  // 4. Generate Article & SEO via Nobi AI Engine (Provider Independent + Timeout Bounded)
+  // 4. Generate Article & SEO via Nobi AI Engine
   const aiResult = await NobiAIEngine.generateBlog({
     topic: randomTopic.topic,
     category: randomTopic.category,
     theme: randomTopic.theme,
   });
 
+  // AI Quality Gate Verification
+  if (!aiResult.title || !aiResult.content || aiResult.content.length < 100) {
+    await finalizeGenerationRun(runId, {
+      status: 'failed',
+      error: 'AI Quality Gate failed: Content too short or missing title.',
+    });
+    return NextResponse.json(
+      { error: 'AI Quality Gate failed: Generated content did not meet minimum standards.' },
+      { status: 422 }
+    );
+  }
+
   const uniqueSlug = `${aiResult.seo.slug}-${Date.now().toString().slice(-4)}`;
 
   try {
     const supabase = await createClient();
 
-    // 5. Check Duplicate Post Title in Database
+    // 5. Duplicate Check via Database Title Lookup
     const { data: existing } = await supabase
       .from('Post')
-      .select('id')
+      .select('id, slug, title')
       .eq('title', aiResult.title)
       .single();
 
     if (existing) {
+      await finalizeGenerationRun(runId, {
+        status: 'completed',
+        postId: existing.id,
+        postSlug: existing.slug,
+        postTitle: existing.title,
+        newsletterStatus: 'skipped_duplicate',
+      });
       return NextResponse.json(
         {
-          message: 'Topic already generated recently. Skipping duplicate.',
+          message: 'Topic already published in database. Skipping duplicate.',
           status: 'duplicate_skipped',
+          runId,
+          post: existing,
         },
         { status: 200 }
       );
     }
 
-    // 6. Insert Sanitized Article into Supabase
+    // 6. Insert Sanitized Article into Database
+    const now = new Date().toISOString();
     const { data: post, error } = await supabase
       .from('Post')
       .insert({
@@ -162,7 +202,8 @@ async function handleAutomatedGeneration(req: NextRequest) {
         readingTime: aiResult.readingTime,
         coverUrl: '/assets/nobi-author.png',
         status: 'published',
-        publishedAt: new Date().toISOString(),
+        publishedAt: now,
+        updatedAt: now,
         seoTitle: aiResult.seo.title,
         seoDescription: aiResult.seo.metaDescription,
       })
@@ -170,23 +211,25 @@ async function handleAutomatedGeneration(req: NextRequest) {
       .single();
 
     if (error || !post) {
+      await finalizeGenerationRun(runId, {
+        status: 'failed',
+        error: error?.message || 'Database insert failed',
+      });
       return NextResponse.json(
         { error: error?.message || 'Database insert failed' },
         { status: 500 }
       );
     }
 
-    // Mark Idempotency key for 12 hours
-    try {
-      await redis.set(todayKey, post.id, { ex: 43200 });
-    } catch {}
-
     // Invalidate Redis Caches
     await cacheDel('posts:all');
     await cacheDel(`posts:${post.slug}`);
 
-    // 8. Trigger Automated Newsletter Broadcast (Idempotent)
-    let newsletterResult = { success: false, message: 'Skipped' };
+    // 7. Trigger Automated Newsletter Broadcast
+    let newsletterResult: { success: boolean; message: string; beehiivPostId?: string } = {
+      success: false,
+      message: 'Skipped',
+    };
     if (process.env.BLOG_AUTO_NEWSLETTER !== 'false') {
       try {
         newsletterResult = await triggerAutomatedNewsletterBroadcast({
@@ -201,9 +244,21 @@ async function handleAutomatedGeneration(req: NextRequest) {
       }
     }
 
+    // 8. Finalize Generation Run State
+    await finalizeGenerationRun(runId, {
+      status: 'completed',
+      postId: post.id,
+      postSlug: post.slug,
+      postTitle: post.title,
+      newsletterStatus: newsletterResult.success ? 'sent' : 'failed',
+      beehiivPostId: newsletterResult.beehiivPostId,
+      providerUsed: aiResult.providerUsed,
+    });
+
     return NextResponse.json({
       success: true,
-      message: 'Automated daily blog generated, sanitized, and published safely.',
+      message: 'Automated blog generated, claimed, published, and recorded safely.',
+      runId,
       providerUsed: aiResult.providerUsed,
       post: {
         id: post.id,
@@ -213,6 +268,10 @@ async function handleAutomatedGeneration(req: NextRequest) {
       newsletterResult,
     });
   } catch (err: any) {
+    await finalizeGenerationRun(runId, {
+      status: 'failed',
+      error: err.message || 'Server error',
+    });
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
