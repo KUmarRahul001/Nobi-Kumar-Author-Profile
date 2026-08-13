@@ -33,4 +33,16 @@ describe('AI System Security & Sanitization Unit Tests', () => {
     expect(seo.metaDescription.length).toBeLessThanOrEqual(155);
     expect(seo.canonicalUrl).toContain('/blog/test-slug');
   });
+
+  it('enforces $0 OpenRouter free mode by rejecting paid models when OPENROUTER_FREE_ONLY=true', async () => {
+    const { OpenRouterProvider } = await import('../ai-providers');
+    const provider = new OpenRouterProvider();
+
+    process.env.OPENROUTER_API_KEY = 'test-key';
+    process.env.OPENROUTER_FREE_ONLY = 'true';
+    process.env.OPENROUTER_MODEL = 'openai/gpt-4-paid';
+
+    const result = await provider.generate({ topic: 'Test', category: 'Test', theme: 'Test' });
+    expect(result).toBeNull();
+  });
 });

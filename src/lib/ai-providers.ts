@@ -98,21 +98,37 @@ export class OpenRouterProvider implements AIProvider {
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.GROQ_API_KEY;
     if (!apiKey) return null;
 
+    const isFreeOnly = process.env.OPENROUTER_FREE_ONLY !== 'false';
+    const rawModel = process.env.OPENROUTER_MODEL || 'openrouter/free';
+
+    // $0 Enforcement Rule: In free-only mode, reject paid models
+    if (isFreeOnly && rawModel !== 'openrouter/free' && !rawModel.endsWith(':free')) {
+      console.warn(
+        `[OpenRouter Enforcement] Model '${rawModel}' rejected because OPENROUTER_FREE_ONLY=true. Falling back.`
+      );
+      return null;
+    }
+
     const endpoint = process.env.OPENROUTER_API_KEY
       ? 'https://openrouter.ai/api/v1/chat/completions'
       : 'https://api.groq.com/openai/v1/chat/completions';
 
-    const model = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    if (process.env.OPENROUTER_SITE_URL) {
+      headers['HTTP-Referer'] = process.env.OPENROUTER_SITE_URL;
+    }
+    headers['X-Title'] = process.env.OPENROUTER_APP_NAME || 'Nobi Kumar Author Website';
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
-          model,
+          model: rawModel,
           messages: [
             {
               role: 'system',
@@ -140,7 +156,7 @@ export class OpenRouterProvider implements AIProvider {
         content: parsed.content,
         tags: parsed.tags || 'Nobi Kumar, NNU',
         readingTime: parsed.readingTime || '4 min read',
-        providerUsed: 'OpenRouter/Groq',
+        providerUsed: `OpenRouter (${data.model || rawModel})`,
       };
     } catch {
       return null;
@@ -202,9 +218,9 @@ export async function generateArticleWithFallback(
   const primaryName = (
     process.env.AI_PRIMARY_PROVIDER ||
     process.env.AI_PROVIDER ||
-    'gemini'
+    'openrouter'
   ).toLowerCase();
-  const fallback1Name = (process.env.AI_FALLBACK_PROVIDER_1 || 'openrouter').toLowerCase();
+  const fallback1Name = (process.env.AI_FALLBACK_PROVIDER_1 || 'gemini').toLowerCase();
   const fallback2Name = (process.env.AI_FALLBACK_PROVIDER_2 || 'ollama').toLowerCase();
 
   function getProviderByName(name: string): AIProvider {
