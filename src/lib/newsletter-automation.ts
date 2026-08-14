@@ -39,6 +39,29 @@ export async function triggerAutomatedNewsletterBroadcast(payload: BroadcastPayl
 
   const fullUrl = payload.url.startsWith('http') ? payload.url : `${siteUrl}${payload.url}`;
 
+  // Generate OpenRouter AI knowledge-base commentary for newsletter body
+  let aiEnrichedInsights = '';
+  try {
+    const { NobiAIEngine } = await import('./nobi-ai-engine');
+    const aiInsight = await NobiAIEngine.generateBlog(
+      {
+        topic: `Exclusive Reader Dispatch: ${payload.title}`,
+        category: payload.type === 'book' ? 'Novel Release' : 'Case File',
+        theme: `Behind-the-scenes author breakdown and psychological thriller secrets behind "${payload.title}" in the Nobi Narrative Universe.`,
+        webResearchFacts: `TITLE: ${payload.title}. SUMMARY: ${payload.summary}`,
+      },
+      { timeoutMs: 8000 }
+    );
+    if (aiInsight && aiInsight.content && aiInsight.content.length > 50) {
+      aiEnrichedInsights = `<div style="margin: 20px 0; padding: 16px; background-color: #111317; border-left: 3px solid #b21f2d; border-radius: 4px; font-size: 13px; color: #d1d5db; line-height: 1.6;">
+        <span style="font-size: 10px; font-family: monospace; color: #b21f2d; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 6px;">🧠 NOBI AI ARCHIVE COMMENTARY (${aiInsight.providerUsed}):</span>
+        ${aiInsight.content.slice(0, 450)}...
+      </div>`;
+    }
+  } catch (aiErr) {
+    console.warn('[Newsletter Automation] OpenRouter AI enrichment fallback:', aiErr);
+  }
+
   const subject =
     payload.type === 'book'
       ? `🚨 NEW NOVEL RELEASE: "${payload.title}" by Nobi Kumar`
@@ -69,6 +92,8 @@ export async function triggerAutomatedNewsletterBroadcast(payload: BroadcastPayl
       <div style="font-size: 14px; line-height: 1.6; color: #d1d5db; margin: 20px 0;">
         <p>${payload.summary}</p>
       </div>
+
+      ${aiEnrichedInsights}
 
       <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1f2937;">
         <a href="${fullUrl}" style="background-color: #b21f2d; color: #ffffff; padding: 12px 28px; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">
