@@ -125,3 +125,92 @@ export async function triggerAutomatedNewsletterBroadcast(payload: BroadcastPayl
     };
   }
 }
+
+export async function sendWelcomeEmail(
+  email: string,
+  name?: string
+): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const apiKey = process.env.BEEHIIV_API_KEY;
+  const publicationId =
+    process.env.BEEHIIV_PUBLICATION_ID || process.env.NEXT_PUBLIC_BEEHIIV_PUBLICATION_ID;
+
+  if (!apiKey || !publicationId) {
+    return {
+      success: false,
+      message: 'Beehiiv credentials not configured.',
+    };
+  }
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://nobikumar.netlify.app';
+
+  const recipientName = name || 'Reader';
+  const subject = `Welcome to the Nobi Narrative Universe, ${recipientName}`;
+
+  const htmlContent = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #08090a; color: #f2f0ea; border-radius: 12px; border: 1px solid #1f2937;">
+      <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #1f2937;">
+        <span style="font-size: 11px; font-family: monospace; color: #b21f2d; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">
+          WELCOME TO THE ARCHIVE
+        </span>
+        <h1 style="font-size: 26px; color: #ffffff; text-transform: uppercase; margin-top: 8px; margin-bottom: 4px;">
+          YOU ARE NOW INSIDE THE CIRCLE
+        </h1>
+      </div>
+
+      <div style="font-size: 14px; line-height: 1.7; color: #d1d5db; margin: 24px 0;">
+        <p>Dear ${recipientName},</p>
+        <p>Welcome to the official Nobi Kumar Reader Dispatch. You now have privileged access to author chronicles, classified case files, psychological thriller lore, and early book release updates.</p>
+        <p>Expect exclusive chapter previews, character universe timelines, and dark suspense insights straight from the author's archive.</p>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid #1f2937;">
+        <a href="${siteUrl}/blog" style="background-color: #b21f2d; color: #ffffff; padding: 12px 28px; text-decoration: none; font-size: 13px; font-weight: bold; border-radius: 6px; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">
+          EXPLORE LATEST CASE FILES →
+        </a>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #6b7280; font-family: monospace;">
+        <p>© ${new Date().getFullYear()} Nobi Kumar · All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(`https://api.beehiiv.com/v2/publications/${publicationId}/posts`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: subject,
+        subtitle: 'Welcome to the official Nobi Kumar Author Dispatch.',
+        content: htmlContent,
+        status: 'confirmed',
+        send_time: 'immediate',
+        audience: 'all',
+        platform: 'both',
+      }),
+    });
+
+    const data = await response.json();
+    return {
+      success: response.ok,
+      message: response.ok
+        ? 'Welcome email dispatched successfully.'
+        : data.message || 'Failed to dispatch welcome email',
+    };
+  } catch (err: any) {
+    console.error('[Welcome Email Exception]', err);
+    return {
+      success: false,
+      message: err.message || 'Failed to send welcome email.',
+    };
+  }
+}

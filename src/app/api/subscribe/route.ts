@@ -93,6 +93,10 @@ export async function POST(req: NextRequest) {
           status: bhRes.status,
           data: bhData,
         });
+
+        // Trigger explicit HTML welcome email broadcast for new subscribers
+        const { sendWelcomeEmail } = await import('@/lib/newsletter-automation');
+        await sendWelcomeEmail(email, name);
       } catch (bhErr) {
         console.error('[Subscribe API] Beehiiv API sync error:', bhErr);
       }
