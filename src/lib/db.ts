@@ -74,23 +74,50 @@ export async function getBooks(): Promise<Book[]> {
     const { data: items, error } = await supabase
       .from('Book')
       .select('*')
-      .order('publicationDate', { ascending: false });
+      .order('displayOrder', { ascending: true });
 
     if (!error && items && items.length > 0) {
       return items.map((item: any) => ({
         slug: item.slug,
         title: item.title,
+        subtitle: item.subtitle || '',
         format: item.format || 'kindle',
         seriesName: item.seriesName,
         volumeNumber: item.volumeNumber,
         status: item.status || 'published',
-        synopsis: item.synopsis || item.description || '',
+        synopsis: item.fullSynopsis || item.shortDescription || '',
         coverUrl: item.coverUrl,
-        buyLinks: Array.isArray(item.buyLinks) ? item.buyLinks : [],
-        publicationDate: item.publicationDate || item.createdAt || null,
-        featured: !!item.featured,
-        content: item.content || item.synopsis || '',
-        sampleExcerpt: item.sampleExcerpt,
+        bannerUrl: item.bannerUrl,
+        buyLinks: [
+          item.amazonLink && { label: 'Amazon Kindle', url: item.amazonLink },
+          item.googlePlayLink && { label: 'Google Play', url: item.googlePlayLink },
+          item.appleBooksLink && { label: 'Apple Books', url: item.appleBooksLink },
+          item.koboLink && { label: 'Kobo', url: item.koboLink },
+          item.paperbackLink && { label: 'Paperback', url: item.paperbackLink },
+          item.audibleLink && { label: 'Audible', url: item.audibleLink },
+          item.kukuFmLink && { label: 'Kuku FM', url: item.kukuFmLink },
+          item.pocketFmLink && { label: 'Pocket FM', url: item.pocketFmLink },
+          item.customLink && { label: 'Buy Now', url: item.customLink },
+        ].filter(Boolean),
+        publicationDate: item.releaseDate || item.createdAt || null,
+        featured: !!item.isFeatured,
+        isBestseller: !!item.isBestseller,
+        isEditorsChoice: !!item.isEditorsChoice,
+        content: item.fullSynopsis || item.shortDescription || '',
+        sampleExcerpt: item.samplePdfUrl || item.previewUrl,
+        tags: Array.isArray(item.tags)
+          ? item.tags
+          : (item.tags || '')
+              .split(',')
+              .map((t: string) => t.trim())
+              .filter(Boolean),
+        genre: item.genre || '',
+        pages: item.pages,
+        readingTime: item.readingTime,
+        seoTitle: item.seoTitle,
+        seoDescription: item.seoDescription,
+        trailerLink: item.trailerLink,
+        authorNotes: item.authorNotes,
       }));
     }
   } catch (err) {
