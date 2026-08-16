@@ -38,7 +38,7 @@ interface UniverseMapProps {
 type FilterType = 'all' | 'character' | 'story' | 'location';
 type ViewMode = 'graph' | 'timeline';
 
-export default function UniverseMap({ nodes, edges, timeline = [] }: UniverseMapProps) {
+export default function UniverseMap({ nodes = [], edges = [], timeline = [] }: UniverseMapProps) {
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(nodes[0]?.id || null);
   const [filter, setFilter] = React.useState<FilterType>('all');
   const [viewMode, setViewMode] = React.useState<ViewMode>('graph');
@@ -46,9 +46,10 @@ export default function UniverseMap({ nodes, edges, timeline = [] }: UniverseMap
   const [zoomLevel, setZoomLevel] = React.useState<number>(1);
   const [hoveredNodeId, setHoveredNodeId] = React.useState<string | null>(null);
 
-  const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
+  const selectedNode =
+    nodes && nodes.length > 0 ? nodes.find((n) => n.id === selectedNodeId) || nodes[0] : null;
 
-  const filteredNodes = nodes.filter((node) => {
+  const filteredNodes = (nodes || []).filter((node) => {
     const matchesFilter = filter === 'all' || node.type === filter;
     const matchesSearch =
       !searchQuery ||
@@ -57,7 +58,7 @@ export default function UniverseMap({ nodes, edges, timeline = [] }: UniverseMap
     return matchesFilter && matchesSearch;
   });
 
-  const filteredTimeline = timeline.filter((event) => {
+  const filteredTimeline = (timeline || []).filter((event) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -452,49 +453,60 @@ export default function UniverseMap({ nodes, edges, timeline = [] }: UniverseMap
           </div>
 
           <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-border/80 bg-card/95 backdrop-blur-xl flex flex-col p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
-              <div className="space-y-1">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-mono uppercase bg-crimson/15 text-crimson font-bold border border-crimson/30">
-                  {getNodeIcon(selectedNode.type, 11)} {selectedNode.type} dossier
-                </span>
-                <h3 className="text-xl font-serif font-black text-foreground">
-                  {selectedNode.label}
-                </h3>
-              </div>
-            </div>
+            {selectedNode ? (
+              <>
+                <div className="flex items-center justify-between border-b border-border/60 pb-4">
+                  <div className="space-y-1">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-mono uppercase bg-crimson/15 text-crimson font-bold border border-crimson/30">
+                      {getNodeIcon(selectedNode.type, 11)} {selectedNode.type} dossier
+                    </span>
+                    <h3 className="text-xl font-serif font-black text-foreground">
+                      {selectedNode.label}
+                    </h3>
+                  </div>
+                </div>
 
-            <div className="space-y-4 flex-1 overflow-y-auto pr-1">
-              <div className="p-4 rounded-xl bg-neutral-950/80 border border-border/60 space-y-2">
-                <span className="text-[10px] font-mono text-muted uppercase tracking-wider block font-bold">
-                  Canonical Summary
-                </span>
-                <p className="text-xs text-foreground/90 font-sans leading-relaxed">
-                  {selectedNode.summary}
+                <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                  <div className="p-4 rounded-xl bg-neutral-950/80 border border-border/60 space-y-2">
+                    <span className="text-[10px] font-mono text-muted uppercase tracking-wider block font-bold">
+                      Canonical Summary
+                    </span>
+                    <p className="text-xs text-foreground/90 font-sans leading-relaxed">
+                      {selectedNode.summary}
+                    </p>
+                  </div>
+
+                  {selectedNode.bio && (
+                    <div className="p-4 rounded-xl bg-neutral-950/80 border border-border/60 space-y-2">
+                      <span className="text-[10px] font-mono text-crimson uppercase tracking-wider block font-bold">
+                        Classified Dossier Notes
+                      </span>
+                      <p className="text-xs text-muted font-sans leading-relaxed italic">
+                        "{selectedNode.bio}"
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedNode.bookId && (
+                    <div className="pt-2">
+                      <Link
+                        href={`/books/${selectedNode.bookId}`}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(178,31,45,0.4)] hover:scale-[1.02]"
+                      >
+                        <span>Read Connected Novel</span> <ChevronRight size={14} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-3 text-muted p-8">
+                <Network className="w-8 h-8 text-crimson/50 animate-pulse" />
+                <p className="text-xs font-mono">
+                  Select a node from the map to view dossier lore.
                 </p>
               </div>
-
-              {selectedNode.bio && (
-                <div className="p-4 rounded-xl bg-neutral-950/80 border border-border/60 space-y-2">
-                  <span className="text-[10px] font-mono text-crimson uppercase tracking-wider block font-bold">
-                    Classified Dossier Notes
-                  </span>
-                  <p className="text-xs text-muted font-sans leading-relaxed italic">
-                    "{selectedNode.bio}"
-                  </p>
-                </div>
-              )}
-
-              {selectedNode.bookId && (
-                <div className="pt-2">
-                  <Link
-                    href={`/books/${selectedNode.bookId}`}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-crimson hover:bg-crimson/90 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(178,31,45,0.4)] hover:scale-[1.02]"
-                  >
-                    <span>Read Connected Novel</span> <ChevronRight size={14} />
-                  </Link>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       )}
