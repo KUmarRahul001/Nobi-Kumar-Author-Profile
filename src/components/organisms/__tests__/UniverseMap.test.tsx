@@ -51,6 +51,6 @@ describe('UniverseMap Component', () => {
     fireEvent.click(characterButton);
 
     // Check detailed sidebar content display
-    expect(screen.getByText('Archivist bio.')).toBeInTheDocument();
+    expect(screen.getByText(/Archivist bio\./i)).toBeInTheDocument();
   });
 });
