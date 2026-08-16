@@ -67,6 +67,35 @@ const ensureDirExists = (dirPath: string) => {
 };
 
 export async function getBooks(): Promise<Book[]> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: items, error } = await supabase
+      .from('Book')
+      .select('*')
+      .order('publicationDate', { ascending: false });
+
+    if (!error && items && items.length > 0) {
+      return items.map((item: any) => ({
+        slug: item.slug,
+        title: item.title,
+        format: item.format || 'kindle',
+        seriesName: item.seriesName,
+        volumeNumber: item.volumeNumber,
+        status: item.status || 'published',
+        synopsis: item.synopsis || item.description || '',
+        coverUrl: item.coverUrl,
+        buyLinks: Array.isArray(item.buyLinks) ? item.buyLinks : [],
+        publicationDate: item.publicationDate || item.createdAt || null,
+        featured: !!item.featured,
+        content: item.content || item.synopsis || '',
+        sampleExcerpt: item.sampleExcerpt,
+      }));
+    }
+  } catch (err) {
+    console.warn('[db.ts] Supabase getBooks query failed, falling back to local MDX:', err);
+  }
+
   ensureDirExists(BOOKS_DIR);
   const files = fs.readdirSync(BOOKS_DIR).filter((file) => file.endsWith('.mdx'));
 
@@ -95,6 +124,35 @@ export async function getBooks(): Promise<Book[]> {
 }
 
 export async function getBookBySlug(slug: string): Promise<Book | null> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: item, error } = await supabase.from('Book').select('*').eq('slug', slug).single();
+
+    if (!error && item) {
+      return {
+        slug: item.slug,
+        title: item.title,
+        format: item.format || 'kindle',
+        seriesName: item.seriesName,
+        volumeNumber: item.volumeNumber,
+        status: item.status || 'published',
+        synopsis: item.synopsis || item.description || '',
+        coverUrl: item.coverUrl,
+        buyLinks: Array.isArray(item.buyLinks) ? item.buyLinks : [],
+        publicationDate: item.publicationDate || item.createdAt || null,
+        featured: !!item.featured,
+        content: item.content || item.synopsis || '',
+        sampleExcerpt: item.sampleExcerpt,
+      };
+    }
+  } catch (err) {
+    console.warn(
+      `[db.ts] Supabase getBookBySlug query failed for ${slug}, falling back to local MDX:`,
+      err
+    );
+  }
+
   ensureDirExists(BOOKS_DIR);
   const filePath = path.join(BOOKS_DIR, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
