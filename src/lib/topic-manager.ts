@@ -11,7 +11,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { createClient } from './supabase/server';
+import { createClientSafe as createClient } from './supabase/server';
 
 export interface KnowledgeTopic {
   id: string;
@@ -163,11 +163,13 @@ export async function getPublishedContentHistory(): Promise<{
   // 2. Read live Supabase published posts
   try {
     const supabase = await createClient();
-    const { data: posts, error } = await supabase.from('Post').select('title, category');
-    if (!error && posts) {
-      for (const p of posts) {
-        if (p.title) titles.add(p.title.trim().toLowerCase());
-        if (p.category) categories.push(p.category);
+    if (supabase) {
+      const { data: posts, error } = await supabase.from('Post').select('title, category');
+      if (!error && posts) {
+        for (const p of posts) {
+          if (p.title) titles.add(p.title.trim().toLowerCase());
+          if (p.category) categories.push(p.category);
+        }
       }
     }
   } catch {}

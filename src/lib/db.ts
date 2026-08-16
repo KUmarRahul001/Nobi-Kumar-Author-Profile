@@ -68,8 +68,9 @@ const ensureDirExists = (dirPath: string) => {
 
 export async function getBooks(): Promise<Book[]> {
   try {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
+    const { createClientSafe } = await import('@/lib/supabase/server');
+    const supabase = await createClientSafe();
+    if (!supabase) throw new Error('Supabase client unavailable');
     const { data: items, error } = await supabase
       .from('Book')
       .select('*')
@@ -125,8 +126,9 @@ export async function getBooks(): Promise<Book[]> {
 
 export async function getBookBySlug(slug: string): Promise<Book | null> {
   try {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
+    const { createClientSafe } = await import('@/lib/supabase/server');
+    const supabase = await createClientSafe();
+    if (!supabase) throw new Error('Supabase client unavailable');
     const { data: item, error } = await supabase.from('Book').select('*').eq('slug', slug).single();
 
     if (!error && item) {
@@ -179,8 +181,9 @@ export async function getBookBySlug(slug: string): Promise<Book | null> {
 
 export async function getPosts(): Promise<Post[]> {
   try {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
+    const { createClientSafe } = await import('@/lib/supabase/server');
+    const supabase = await createClientSafe();
+    if (!supabase) throw new Error('Supabase client unavailable');
     const { data, error } = await supabase
       .from('Post')
       .select('*')
@@ -238,8 +241,9 @@ export async function getPosts(): Promise<Post[]> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
+    const { createClientSafe } = await import('@/lib/supabase/server');
+    const supabase = await createClientSafe();
+    if (!supabase) throw new Error('Supabase client unavailable');
     const { data: item, error } = await supabase.from('Post').select('*').eq('slug', slug).single();
 
     if (!error && item) {
