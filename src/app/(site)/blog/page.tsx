@@ -2,7 +2,7 @@ import * as React from 'react';
 import { getPosts } from '@/lib/db';
 import BlogListContainer from '@/components/organisms/BlogListContainer';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function BlogPage() {
   const posts = await getPosts();

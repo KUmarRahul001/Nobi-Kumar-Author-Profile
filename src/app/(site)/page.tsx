@@ -5,7 +5,7 @@ import StartHereSection from '@/components/organisms/StartHereSection';
 import FeaturedBookPanel from '@/components/organisms/FeaturedBookPanel';
 import FreeReaderMagnet from '@/components/organisms/FreeReaderMagnet';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const books = await getBooks();

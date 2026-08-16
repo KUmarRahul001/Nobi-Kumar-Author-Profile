@@ -5,6 +5,8 @@ import Breadcrumbs from '@/components/atoms/Breadcrumbs';
 import JsonLd from '@/components/atoms/JsonLd';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Official Nobi Kumar Reading Order & Bibliography',
   description:

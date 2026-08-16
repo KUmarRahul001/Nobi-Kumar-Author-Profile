@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import Book3DCover from '@/components/atoms/Book3DCover';
 
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Books by Nobi Kumar | Official Bibliography & Novels',
