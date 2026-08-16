@@ -289,13 +289,22 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   };
 }
 
-export async function getUniverseData(): Promise<UniverseData> {
-  ensureDirExists(UNIVERSE_DIR);
-  const filePath = path.join(UNIVERSE_DIR, 'map.json');
-  if (!fs.existsSync(filePath)) {
-    return { nodes: [], edges: [] };
+export async function getUniverseData(): Promise<UniverseData & { timeline?: any[] }> {
+  try {
+    ensureDirExists(UNIVERSE_DIR);
+    const filePath = path.join(UNIVERSE_DIR, 'map.json');
+    if (!fs.existsSync(filePath)) {
+      return { nodes: [], edges: [], timeline: [] };
+    }
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(fileContent);
+    return {
+      nodes: Array.isArray(data.nodes) ? data.nodes : [],
+      edges: Array.isArray(data.edges) ? data.edges : [],
+      timeline: Array.isArray(data.timeline) ? data.timeline : [],
+    };
+  } catch (err) {
+    console.warn('[db.ts] getUniverseData failed, returning empty universe:', err);
+    return { nodes: [], edges: [], timeline: [] };
   }
-
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(fileContent) as UniverseData;
 }

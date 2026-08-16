@@ -3,6 +3,7 @@ import { getUniverseData } from '@/lib/db';
 import UniverseMap from '@/components/organisms/UniverseMap';
 
 export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function UniversePage() {
   const data = await getUniverseData();
@@ -26,11 +27,7 @@ export default async function UniversePage() {
         <div className="h-px w-24 bg-border mx-auto" />
 
         {/* Dynamic Map Component */}
-        <UniverseMap
-          nodes={data.nodes}
-          edges={data.edges}
-          timeline={(data as any).timeline || []}
-        />
+        <UniverseMap nodes={data.nodes} edges={data.edges} timeline={data.timeline ?? []} />
       </div>
     </div>
   );

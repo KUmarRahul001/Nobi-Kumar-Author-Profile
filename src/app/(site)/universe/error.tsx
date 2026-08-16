@@ -1,0 +1,53 @@
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { Network, RotateCcw } from 'lucide-react';
+
+export default function UniverseError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  React.useEffect(() => {
+    console.error('[Universe Page Error]', error);
+  }, [error]);
+
+  return (
+    <div className="flex-1 bg-background text-foreground min-h-[60vh] flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="flex justify-center">
+          <div className="p-5 rounded-2xl bg-crimson/10 border border-crimson/30 text-crimson">
+            <Network className="w-10 h-10 animate-pulse" />
+          </div>
+        </div>
+        <span className="block text-[10px] font-mono text-crimson uppercase tracking-widest font-bold">
+          CLASSIFIED ARCHIVE — TEMPORARILY OFFLINE
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-serif font-black uppercase text-foreground">
+          Universe Map Unavailable
+        </h1>
+        <p className="text-muted text-xs sm:text-sm leading-relaxed font-sans">
+          The NNU interactive lore map encountered an error loading classified data. This is a
+          temporary issue — please try reloading the archive.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <button
+            onClick={reset}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-crimson hover:bg-crimson/90 text-white transition-all shadow-lg"
+          >
+            <RotateCcw size={14} /> Reload Archive
+          </button>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-border/80 bg-neutral-900/80 hover:bg-neutral-800 text-foreground transition-all"
+          >
+            Return to Home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
