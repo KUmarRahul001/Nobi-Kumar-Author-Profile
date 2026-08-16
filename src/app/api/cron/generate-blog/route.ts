@@ -134,15 +134,32 @@ async function handleAutomatedGeneration(req: NextRequest) {
     }
   }
 
-  // Select Topic from Knowledge Base
-  const randomTopic =
-    KNOWLEDGE_BASE_TOPICS[Math.floor(Math.random() * KNOWLEDGE_BASE_TOPICS.length)];
+  // 4. Select Unique, Non-Duplicate Topic with Category Rotation (§3.4 Uniqueness Rules)
+  const { selectNextUniqueTopic, recordPublishedTopicToLog } = await import('@/lib/topic-manager');
+  const selectedTopic = await selectNextUniqueTopic();
 
-  // 4. Generate Article & SEO via Nobi AI Engine
+  if (!selectedTopic) {
+    await finalizeGenerationRun(runId, {
+      status: 'completed',
+      newsletterStatus: 'skipped_no_new_topic',
+    });
+    return NextResponse.json(
+      {
+        message:
+          'All verified canonical topics have already been covered. Skipping publish cycle to preserve uniqueness.',
+        status: 'skipped_no_new_topic',
+        runId,
+      },
+      { status: 200 }
+    );
+  }
+
+  // 5. Generate Article & SEO via Nobi AI Engine
   const aiResult = await NobiAIEngine.generateBlog({
-    topic: randomTopic.topic,
-    category: randomTopic.category,
-    theme: randomTopic.theme,
+    topic: selectedTopic.topic,
+    category: selectedTopic.category,
+    theme: selectedTopic.theme,
+    knowledgeBaseContext: selectedTopic.canonicalContext,
   });
 
   // AI Quality Gate Verification
@@ -188,7 +205,7 @@ async function handleAutomatedGeneration(req: NextRequest) {
       );
     }
 
-    // 6. Insert Sanitized Article into Database
+    // 7. Insert Sanitized Article into Database
     const now = new Date().toISOString();
     const { data: post, error } = await supabase
       .from('Post')
@@ -197,8 +214,8 @@ async function handleAutomatedGeneration(req: NextRequest) {
         slug: uniqueSlug,
         excerpt: aiResult.excerpt,
         content: aiResult.content,
-        category: randomTopic.category,
-        tags: aiResult.tags,
+        category: selectedTopic.category,
+        tags: selectedTopic.tags.join(', ') || aiResult.tags,
         readingTime: aiResult.readingTime,
         coverUrl: '/assets/nobi-author.png',
         status: 'published',
@@ -220,6 +237,15 @@ async function handleAutomatedGeneration(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // 8. Record to local content log file (src/content/published_topics.json)
+    recordPublishedTopicToLog({
+      slug: post.slug,
+      title: post.title,
+      category: post.category,
+      topic: selectedTopic.topic,
+      publishedAt: post.publishedAt,
+    });
 
     // Invalidate Redis Caches
     await cacheDel('posts:all');
